@@ -1,5 +1,5 @@
 const login = (req, res) => {
-    res.render('auth/login');
+    res.render('login', { layout: "login" });
 }
 
 
