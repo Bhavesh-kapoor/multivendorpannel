@@ -7215,5 +7215,10 @@ select.h40 {
     width: 100%;
   }
 }
-
+.custom-toast {
+  font-size: 17px; /* Increase font size */
+  padding: 20px;   /* Increase padding */
+  min-width: 300px; /* Set minimum width */
+  max-width: 300px; /* Set maximum width */
+}
 /*# sourceMappingURL=style.css.map */

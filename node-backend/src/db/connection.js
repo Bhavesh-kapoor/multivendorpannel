@@ -18,7 +18,7 @@ const connectToDatabase = async (req, res) => {
         user: MYSQL_USER,
         password: MYSQL_PASSWORD,
         database: MYSQL_DB_NAME,
-        port: 8889,
+        port: 3306,
       });
 
       console.log("DATABASE CONNECTED!");

@@ -39,7 +39,7 @@ const loginHandler = async (req, res) => {
           )
         );
     } else {
-      res.status(401).send("Invalid email or password");
+      return res.status(401).json(new ApiError(401,"Invalid Credentials",['Invalid Credentials']));
     }
   } catch (err) {
     console.error("Error executing query:", err);

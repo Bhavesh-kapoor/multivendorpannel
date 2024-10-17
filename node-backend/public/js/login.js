@@ -5,11 +5,11 @@ submit.addEventListener("click", async (e) => {
 
   let password = document.getElementById("password").value;
   if (email.length === 0) {
-    alert("Please Enter the email");
+    GlobalToast('Email is required!', 'red');
 
     return;
   } else if (password.length === 0) {
-    alert("Please Enter the Password");
+    GlobalToast('Password is required!', 'red');
     return;
   } else {
     console.log("hi", email, password);
@@ -22,9 +22,28 @@ submit.addEventListener("click", async (e) => {
     });
 
     const response = await res.json();
-    console.log(response);
+    if (response.statusCode == 401) {
+      GlobalToast(response.error[0], 'red');
+
+    } else {
+      console.log(response);
+
+    }
     if (response.statusCode === 200) {
       localStorage.setItem("user", JSON.stringify(response.data));
     }
   }
 });
+
+
+function GlobalToast(msg, colour) {
+  Toastify({
+    text: msg,
+    duration: 3000,
+    className: 'custom-toast',
+    gravity: "top",  // Position of the toast ("top" or "bottom")
+    position: "center",  // Position of the toast ("left", "center", or "right")
+    backgroundColor: colour,  // Custom background color
+    close: true  // Show close button
+  }).showToast();
+}
