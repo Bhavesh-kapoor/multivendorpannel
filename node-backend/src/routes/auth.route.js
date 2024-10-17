@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { login } from "../controllers/admin/Auth/auth.controller.js";
+import {
+  login,
+  loginHandler,
+} from "../controllers/admin/Auth/auth.controller.js";
 let authenticationRoute = Router();
 
-authenticationRoute.get('/login', login);
-
-
+authenticationRoute.get("/login", login);
+authenticationRoute.post("/login", loginHandler);
 
 export default authenticationRoute;
-
-
