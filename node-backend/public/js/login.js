@@ -21,6 +21,10 @@ submit.addEventListener("click", async (e) => {
       body: JSON.stringify({ email, password }),
     });
 
-    alert("kkk");
+    const response = await res.json();
+    console.log(response);
+    if (response.statusCode === 200) {
+      localStorage.setItem("user", JSON.stringify(response.data));
+    }
   }
 });
