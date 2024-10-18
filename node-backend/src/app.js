@@ -3,19 +3,29 @@ import authenticationRoute from "./routes/auth.route.js";
 import { index } from "./controllers/admin/dashboard.controller.js";
 import usersRoute from "./routes/users.route.js";
 import cors from 'cors';        // Use import for external libraries
+import categoryRoute from "./routes/category.route.js";
+import verifyJWTtoken from "./middleware/auth.middleware.js";
 
 const app = express();
 
-app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+import cookieParser from 'cookie-parser';
+
+import './utils/helpers.js';
 app.use(cors());
+app.use(cookieParser());
 
 // AUTH ROUTES
 app.use("/auth", authenticationRoute);
-app.get("/admin/dashboard", index);
+app.get("/admin/dashboard", verifyJWTtoken, index);
 
 // users routes
-app.use("/admin/users", usersRoute);
+app.use("/admin/users", verifyJWTtoken, usersRoute);
+
+// categories routes
+app.use("/admin/categories", verifyJWTtoken, categoryRoute);
+
 
 export default app;
