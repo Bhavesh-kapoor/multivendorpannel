@@ -1,4 +1,4 @@
-
+let base_url = window.origin + '/';
 $('#globalform').on('submit', async (e) => {
     e.preventDefault();
     $('.save').html('Please wait.....');
@@ -61,4 +61,35 @@ function reloadpage() {
         window.location.reload();  // This reloads the current page
 
     }, 1000)
+}
+
+
+async function globalDelete(id, table) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Delete this'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            let url = base_url + 'admin/global/delete';
+            let result = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id: id, table: table })
+            })
+            let jsonres = await result.json();
+            if (jsonres.statusCode == 200) {
+                GlobalToast(jsonres.message, 'green');
+                reloadpage();
+            } else {
+                GlobalToast(jsonres.message, 'red');
+            }
+        }
+    });
 }

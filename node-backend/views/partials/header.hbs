@@ -1,7 +1,7 @@
 <div class="header-dashboard">
   <div class="wrap">
     <div class="header-left">
-      <a href="index.html">
+      <a href="#">
         <img
           class=""
           id="logo_header_mobile"
@@ -124,7 +124,7 @@
                     class="flex items-center justify-between gap20 flex-grow"
                   >
                     <div class="name">
-                      <a href="product-list.html" class="body-text">Kristin
+                      <a href="product-list.html" class="body-text">{{ logggeduserdetail }}
                         Watson</a>
                     </div>
                   </div>
@@ -267,8 +267,8 @@
                 <img src="/images/avatar/user-1.png" alt="" />
               </span>
               <span class="flex flex-column">
-                <span class="body-title mb-2">Kristin Watson</span>
-                <span class="text-tiny">Admin</span>
+                <span class="body-title mb-2">{{ uppercase user.name}}</span>
+                <span class="text-tiny">{{#if user.is_admin }}  Admin {{else}} Vendor {{/if}}</span>
               </span>
             </span>
           </button>
@@ -276,31 +276,7 @@
             class="dropdown-menu dropdown-menu-end has-content"
             aria-labelledby="dropdownMenuButton3"
           >
-            <li>
-              <a href="#" class="user-item">
-                <div class="icon">
-                  <i class="icon-user"></i>
-                </div>
-                <div class="body-title-2">Account</div>
-              </a>
-            </li>
-            <li>
-              <a href="#" class="user-item">
-                <div class="icon">
-                  <i class="icon-mail"></i>
-                </div>
-                <div class="body-title-2">Inbox</div>
-                <div class="number">27</div>
-              </a>
-            </li>
-            <li>
-              <a href="#" class="user-item">
-                <div class="icon">
-                  <i class="icon-file-text"></i>
-                </div>
-                <div class="body-title-2">Taskboard</div>
-              </a>
-            </li>
+           
             <li>
               <a href="setting.html" class="user-item">
                 <div class="icon">
@@ -309,16 +285,9 @@
                 <div class="body-title-2">Setting</div>
               </a>
             </li>
+            
             <li>
-              <a href="#" class="user-item">
-                <div class="icon">
-                  <i class="icon-headphones"></i>
-                </div>
-                <div class="body-title-2">Support</div>
-              </a>
-            </li>
-            <li>
-              <a href="login.html" class="user-item">
+              <a href="/admin/users/logout" class="user-item">
                 <div class="icon">
                   <i class="icon-log-out"></i>
                 </div>

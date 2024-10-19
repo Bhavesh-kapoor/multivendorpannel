@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   login,
-  loginHandler,
+  loginHandler
 } from "../controllers/admin/Auth/auth.controller.js";
 let authenticationRoute = Router();
 

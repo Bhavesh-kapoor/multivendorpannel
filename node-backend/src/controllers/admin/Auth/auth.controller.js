@@ -44,7 +44,8 @@ const loginHandler = async (req, res) => {
           {
             id: user.id, // Include user ID or other identifying info in token
             email: user.email,
-            status: user.type,
+            name : user.name,
+            is_admin: user.type,
             // You can include email or any other user details
           },
           process.env.JWT_SECRET, // The secret key used for signing the token
