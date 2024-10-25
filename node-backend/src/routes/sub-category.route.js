@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { index ,create, store, validateSubCategory, edit} from "../controllers/admin/Category/Subcategory/subcategory.controller.js";
+import { index, store, validateSubCategory, update, SubcategoryById, deleteSubCategoryById } from "../controllers/admin/Category/Subcategory/subcategory.controller.js";
 const subCategoryRoutes = Router();
 
 subCategoryRoutes.get("/all", index);
-subCategoryRoutes.get("/add", create);
-subCategoryRoutes.post("/store",validateSubCategory, store);
-subCategoryRoutes.get("/edit/:id", edit);
+subCategoryRoutes.post("/store", validateSubCategory, store);
+subCategoryRoutes.put("/update/:_id", update);
+subCategoryRoutes.get('/get/:_id', SubcategoryById);
+subCategoryRoutes.delete('/delete/:_id', deleteSubCategoryById);
+
 export default subCategoryRoutes;

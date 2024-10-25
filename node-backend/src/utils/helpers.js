@@ -1,20 +1,8 @@
-import handlebars from 'handlebars';
-handlebars.registerHelper('add', function (a, b) {
-    return a + b;
-})
+import mongoose from "mongoose";
 
-handlebars.registerHelper('eq', function (a, b) {
-    return a === b;
-});
+const validObjectId = (id) => {
+    return mongoose.Types.ObjectId.isValid(id) ? true : false;
 
-// Register the isAdmin helper globally
-handlebars.registerHelper('isAdmin', function(user) {
-    return user && user.is_admin === 1; // Ensure to check if user exists
-});
+}
 
-handlebars.registerHelper('uppercase',function(string){
-    return string.toUpperCase();
-})
-
-
-
+export { validObjectId };

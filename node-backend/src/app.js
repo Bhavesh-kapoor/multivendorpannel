@@ -14,23 +14,12 @@ app.use(express.static("public"));
 import cookieParser from 'cookie-parser';
 
 import './utils/helpers.js';
-
-import globalroutes from "./routes/global.route.js";
-import subCategoryRoutes from "./routes/sub-category.route.js";
+import integratedroutes from "./routes/integrated.route.js";
 app.use(cors());
 app.use(cookieParser());
 
-// AUTH ROUTES
-app.use('/admin/global', globalroutes);
-app.use("/auth", authenticationRoute);
-app.get("/admin/dashboard", verifyJWTtoken, index);
-
-// users routes
-app.use("/admin/users", verifyJWTtoken, usersRoute);
-
-// categories / Sub Cat routes
-app.use("/api/categories", categoryRoute);
-app.use("/admin/subcategories", verifyJWTtoken, subCategoryRoutes);
+// integrated routes
+app.use('/api', integratedroutes)
 
 
 export default app;
