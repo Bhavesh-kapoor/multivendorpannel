@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { create } from "../controllers/admin/Vendor/vendor.controller.js";
+import { createVendor, deleteVendor, readVendor, updateVendor } from "../controllers/admin/Vendor/vendor.controller.js";
 const vendorsRoute = Router();
 
 
-vendorsRoute.post("/",create)
+vendorsRoute.post("/",createVendor)
+vendorsRoute.get("/:email",readVendor)
+vendorsRoute.put("/:email",updateVendor)  
+vendorsRoute.delete("/:email",deleteVendor)
 
 
 export default vendorsRoute
