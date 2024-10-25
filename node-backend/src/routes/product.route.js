@@ -3,10 +3,10 @@ import { addProduct, deleteProduct, updateProduct, getProduct, getAllProducts, p
 
 const router = new Router();
 router.post("/add", productValidationRules, addProduct)
-router.post("/edit/:productId", updateProduct)
-router.post("/get/:productId", getProduct)
-router.post("/delete/:productId", deleteProduct)
-router.post("/get-all", getAllProducts)
+router.put("/edit/:productId", updateProduct)
+router.get("/get/:productId", getProduct)
+router.delete("/delete/:productId", deleteProduct)
+router.get("/get-all", getAllProducts)
 
 
 export default router;

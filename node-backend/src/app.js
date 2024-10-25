@@ -30,7 +30,9 @@ app.use("/admin/users", verifyJWTtoken, usersRoute);
 
 // categories / Sub Cat routes
 app.use("/api/categories", categoryRoute);
-app.use("/admin/subcategories", verifyJWTtoken, subCategoryRoutes);
 
+import productRoutes from "../src/routes/product.route.js"
+app.use("/api/products", productRoutes);
+app.use("/admin/subcategories", verifyJWTtoken, subCategoryRoutes);
 
 export default app;
