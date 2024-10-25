@@ -6,18 +6,6 @@ import connectDB from "./db/connection.js";
 import { engine } from "express-handlebars";
 env.config();
 
-app.engine(
-  "hbs",
-  engine({
-    extname: ".hbs", // Set file extension to '.hbs'
-    defaultLayout: "main", // Optional: layout file (like 'main.hbs')
-    layoutsDir: "./views/layouts", // Directory for layout files
-    partialsDir: "./views/partials", // Directory for partials
-  })
-);
-app.set("view engine", "hbs"); // Set view engine to 'hbs'
-app.set("views", "./views");
-app.use(express.static("public"));
 
 try {
   await connectDB().then(() => {

@@ -29,7 +29,7 @@ app.get("/admin/dashboard", verifyJWTtoken, index);
 app.use("/admin/users", verifyJWTtoken, usersRoute);
 
 // categories / Sub Cat routes
-app.use("/admin/categories", verifyJWTtoken, categoryRoute);
+app.use("/api/categories", categoryRoute);
 app.use("/admin/subcategories", verifyJWTtoken, subCategoryRoutes);
 
 

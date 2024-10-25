@@ -14,8 +14,9 @@ const validateCategory = [
 ];
 
 const index = async (req, res) => {
-    // let [categories] = await connection.query("SELECT * FROM categories where store_id=1 order by id desc");
-    // return res.render("vendors/categories/list", { categories });
+    console.log("sasa");
+
+    
 };
 
 
