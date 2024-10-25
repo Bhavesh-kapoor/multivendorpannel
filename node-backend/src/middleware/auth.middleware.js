@@ -1,44 +1,34 @@
-// import { connection, connectToDatabase } from "../db/connection.js";
-import ApiError from "../utils/apiErrors.js";
 import jwt from "jsonwebtoken";
+import ApiError from "../utils/apiErrors.js";
+import { User } from "../models/user.model.js";
 
-async function verifyJWTtoken(req, res, next) {
-    const token = req.cookies?.useraccesstoken || req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) {
-        return res.redirect('/auth/login');
-    }
-
+const verifyJwtToken = async (req, res, next) => {
     try {
-        // Verify the token
-        const verify = jwt.verify(token, process.env.JWT_SECRET);
+        let token =
+            req.cookies?.accesstoken ||
+            req.header("Authorization")?.replace("Bearer ", "");
 
-        // Check if the user exists in the database
-        // const [user] = await connection.query('SELECT * FROM users WHERE id = ?', [verify.id]);
-        // if (!user[0]) {
-        //     return res.redirect('/auth/login');
-        // }
-
-        // Attach the verified user info to the request object
-        req.user = verify;
-        res.locals.user = req.user; // Set user data to res.locals for global access
-
+        if (!token) {
+            return res.status(400).json(new ApiError(400, "", "Token Not Found!"));
+        }
+        const verified = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
+        if (!verified) {
+            return res.status(409).json(new ApiError(409, "", "Invalid Token"));
+        }
+        // Find user by id
+        let user = await User.findById(verified._id).select(
+            "-password -refreshToken"
+        );
+        if (!user) {
+            return res
+                .status(422)
+                .json(new ApiError(422, "", "User does not exist!"));
+        }
+        req.user = user;
         next();
-
-    } catch (err) {
-        res.clearCookie('useraccesstoken');
-
-        // Handle different JWT errors
-        if (err.name === 'TokenExpiredError') {
-            console.log('JWT token expired');
-            return res.redirect('/auth/login'); // Redirect if token expired
-        }
-
-        if (err.name === 'JsonWebTokenError') {
-            console.log('JWT token is invalid');
-            return res.redirect('/auth/login'); // Redirect if token is invalid
-        }
-        // refresh the token 
+    } catch (error) {
+        return res.status(401).json(new ApiError(401, "", "Unauthorized"));
     }
-}
+};
 
-export default verifyJWTtoken;
+export default verifyJwtToken;
