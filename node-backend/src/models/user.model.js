@@ -40,6 +40,9 @@ const userSchema = new Schema(
         },
         refreshToken: {
             type: String,
+        },
+        shopName: {
+            type: String,
         }
     },
     { timestamps: true }
