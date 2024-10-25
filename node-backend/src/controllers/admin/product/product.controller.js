@@ -13,7 +13,6 @@ const productValidationRules = [
     check('stock').isInt({ min: 1 }).withMessage('Stock must be a non-negative integer'),
     // Add more rules as needed
 ];
-
 /*--------------------------------------------Add a new product---------------------------------------*/
 const addProduct = async (req, res) => {
     const errors = validationResult(req);
@@ -116,7 +115,7 @@ const getProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
-    console.log("checkk",page)
+    console.log("checkk", page)
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limit);
     const skip = (pageNumber - 1) * limitNumber;
