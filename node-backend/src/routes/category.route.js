@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { index ,create, store, validateCategory, edit} from "../controllers/admin/Category/category.controller.js";
+import { index, store, validateCategory, categoryById, deleteCategoryById, update } from "../controllers/admin/Category/category.controller.js";
 const categoryRoute = Router();
 
 categoryRoute.get("/all", index);
-categoryRoute.get("/add", create);
-categoryRoute.post("/store",validateCategory, store);
-categoryRoute.get("/edit/:id", edit);
+categoryRoute.post("/store", validateCategory, store);
+categoryRoute.put("/update/:_id",validateCategory, update);
+categoryRoute.get('/get/:_id', categoryById);
+categoryRoute.delete('/delete/:_id', deleteCategoryById);
+
 export default categoryRoute;

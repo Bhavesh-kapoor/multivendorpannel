@@ -2,75 +2,118 @@
 import { validationResult, check } from "express-validator";
 import ApiError from "../../../../utils/apiErrors.js";
 import ApiResponse from "../../../../utils/apiResponse.js";
-import { DBfetchAllData, DBFetechJoins } from "../../../../db/globalqueries.js";
+import Subcategory from "../../../../models/subcategories.model.js";
+import { validObjectId } from "../../../../utils/helpers.js";
 
 
 
 // Validation rules
 const validateSubCategory = [
-    check('category_id').notEmpty().withMessage('Please select Category First'),
-    check('subcategory_name')
+    check('categoryId').notEmpty().withMessage('Please select Category First'),
+    check('name')
         .notEmpty().withMessage('Sub Category name is required')
         .isLength({ min: 2 }).withMessage(' Sub Category name must be at least 2 characters long'),
+    check('isActive').notEmpty().withMessage('Sub Category  activate or deactivation is required')
 
-    // You can add more validation rules as needed
+
 ];
 
 const index = async (req, res) => {
-    // let [subcategories] = await DBFetechJoins('subcategories', 'subcategories.* , categories.category_name', 'categories', 'category_id', 'id');
-    // return res.render("vendors/categories/subcategories/list", { subcategories });
+    const getAllSubCategories = await Subcategory.find().sort({ _id: 1 });
+    return res.status(200).json(new ApiResponse(200, getAllSubCategories, 'Sub Category Fetched Successfully!'));
+
 };
 
 
-const create = async (req, res) => {
-    // check if the role if admin or vendor
-    // let categories;
-    // if (req.user.is_admin == 1) {
-    //     [categories] = await DBfetchAllData('categories', 'status', 1);
-    // } else {
-    //     [categories] = await DBfetchAllData('categories', 'status', 1, 'store_id', req.user.id);
-    // }
-    // return res.render("vendors/categories/subcategories/add", { categories });
-
-}
 
 
 const store = async (req, res) => {
-    // const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //     return res.status(400).json(new ApiError(400, "Validation Error", errors));
-    // } else {
-    //     let { subcategory_name, status, category_id } = req.body;
-    //     // now fetch the 
-    //     const [rows] = await connection.query("SELECT * FROM subcategories WHERE sub_category_name = ?", [subcategory_name]);
-    //     if (rows.length > 0) {
-    //         return res.status(400).json(new ApiError(400, "Already Exist", { errors: [{ msg: "Sub Category Already exist" }] }))
-    //     } else {
-    //         const insertCategory = "INSERT INTO subcategories (sub_category_name ,category_id, status, store_id,created_at) VALUES (?,? , ? ,? , NOW()) "
-    //         let store_id = 1;
-    //         await connection.query(insertCategory, [subcategory_name, category_id, status, store_id]);
-    //         return res.status(201).json(new ApiResponse(200, 'Sub Category Created Successfully!'));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json(new ApiError(400, "Validation Error", errors));
+    }
+
+    else {
+        let { name, isActive, categoryId } = req.body;
+        try {
+            name = name.toLowerCase().trim();
+            const existingCategory = await Subcategory.findOne({ name });
+            if (existingCategory) {
+                return res.status(409).json(new ApiError(409, '', "Sub Category already exist!"));
+            } else {
+                const subcategoryInfo = await Subcategory.create({ name, categoryId, isActive });
+                res
+                    .status(201)
+                    .json(
+                        new ApiResponse(
+                            201,
+                            subcategoryInfo,
+                            " Sub Category has been created successfully!"
+                        )
+                    );
+            }
 
 
-    //     }
-    // }
+        }
+        catch (err) {
+            res.status(500).json(new ApiError(500, "", "Server error while creating category"));
+        }
+    }
 
 
 
 }
-const edit = async (req, res) => {
-    // find the category data 
-    // try {
-    //     const [edicategory] = await connection.query("SELECT * FROM categories WHERE id = ?", [req.params.id]);
-    //     if (edicategory.length === 0) {
-    //         return res.status(404).send('Category not found');
-    //     }
-    //     return res.render("vendors/categories/edit", { edicategory: edicategory[0] }); // Pass the first (and only) element
-    // } catch (error) {
-    //     console.error(error);
-    //     res.status(500).send('Server error');
-    // }
+const update = async (req, res) => {
+    const { _id } = req.params;
+    if (!validObjectId(_id)) {
+        return res.status(400).json(new ApiError(400, '', 'Invalid Subcategory ID!'));
+    }
+    try {
+        const Subcateg =  await Subcategory.findByIdAndUpdate(
+            _id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+
+        if (!Subcateg) {
+            return res
+                .status(404)
+                .json(new ApiError(404, "", "Error while updating the Sub category"));
+        }
+        res
+            .status(200)
+            .json(new ApiResponse(200, Subcateg, "Sub Category updated successfully!"));
+    } catch (error) {
+        console.log(error);
+        res
+            .status(500)
+            .json(new ApiError(500, error.message, "Server error while updating  Sub category"));
+    }
+};
+
+
+
+const SubcategoryById = async (req, res) => {
+    const { _id } = req.params;
+    if (!validObjectId(_id)) {
+        return res.status(400).json(new ApiError(400, '', 'Invalid  Sub Category ID!'));
+
+    }
+    let subCategoryFind = await Subcategory.findById(_id);
+    if (!subCategoryFind) res.status(404).json(new ApiError(404, '', 'Sub Category Not Found!'));
+    return res.status(200).json(new ApiResponse(200, subCategoryFind, 'Sub Category Fetched Successfully!'));
+
+};
+
+const deleteSubCategoryById = async (req, res) => {
+    const { _id } = req.params;
+    if (!validObjectId(_id)) {
+        return res.status(400).json(new ApiError(400, '', 'Invalid  Sub Category ID!'));
+    }
+    let subCategoryFind = await Subcategory.findByIdAndDelete(_id);
+    if (!subCategoryFind) res.status(404).json(new ApiError(404, '', 'Sub Category Not Found!'));
+    return res.status(200).json(new ApiResponse(200, subCategoryFind, ' Sub Category Deleted Successfully!'));
+
 }
 
-
-export { index, create, store, validateSubCategory, edit };
+export { index, store, update, validateSubCategory, SubcategoryById, deleteSubCategoryById };
