@@ -65,6 +65,24 @@ const readVendor = async (req, res) => {
     }
 };
 
+
+const readAllVendors = async (req, res) => {
+    try {
+        // Fetch all vendors with role "vendor"
+        const vendors = await User.find({ role: "vendor" });
+
+        // Check if any vendors were found
+        if (!vendors.length) {
+            return res.status(404).json(new ApiError(404, 'No vendors found', [], ''));
+        }
+
+        // Return the list of vendors
+        return res.status(200).json(new ApiResponse(200, vendors, 'Vendors fetched successfully'));
+    } catch (error) {
+        return res.status(500).json(new ApiError(500, 'Error reading vendors', [error.message], ''));
+    }
+};
+
 const updateVendor = async (req, res) => {
     const { email } = req.params;
     const { firstName, lastName, mobile, address, shopName, commissionRate, password } = req.body;
@@ -125,4 +143,4 @@ const deleteVendor = async (req, res) => {
 
 
 
-export {createVendor,readVendor,updateVendor,deleteVendor}
+export {createVendor,readVendor,updateVendor,deleteVendor,readAllVendors}
