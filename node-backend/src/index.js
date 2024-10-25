@@ -1,8 +1,8 @@
 import app from "./app.js";
 import express from "express";
 import env from "dotenv";
-import { connectToDatabase } from "./db/connection.js";
 
+import connectDB from "./db/connection.js";
 import { engine } from "express-handlebars";
 env.config();
 
@@ -20,7 +20,7 @@ app.set("views", "./views");
 app.use(express.static("public"));
 
 try {
-  await connectToDatabase().then(() => {
+  await connectDB().then(() => {
     app.listen(process.env.PORT, () => {
       console.log(`server is running at ${process.env.PORT}`);
     });

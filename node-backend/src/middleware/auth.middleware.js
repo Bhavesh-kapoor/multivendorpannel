@@ -1,4 +1,4 @@
-import { connection, connectToDatabase } from "../db/connection.js";
+// import { connection, connectToDatabase } from "../db/connection.js";
 import ApiError from "../utils/apiErrors.js";
 import jwt from "jsonwebtoken";
 
@@ -13,10 +13,10 @@ async function verifyJWTtoken(req, res, next) {
         const verify = jwt.verify(token, process.env.JWT_SECRET);
 
         // Check if the user exists in the database
-        const [user] = await connection.query('SELECT * FROM users WHERE id = ?', [verify.id]);
-        if (!user[0]) {
-            return res.redirect('/auth/login');
-        }
+        // const [user] = await connection.query('SELECT * FROM users WHERE id = ?', [verify.id]);
+        // if (!user[0]) {
+        //     return res.redirect('/auth/login');
+        // }
 
         // Attach the verified user info to the request object
         req.user = verify;

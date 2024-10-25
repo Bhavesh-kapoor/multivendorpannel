@@ -1,32 +1,42 @@
-import mysql from "mysql2/promise";
-import {
-  MYSQL_DB_NAME,
-  MYSQL_HOST,
-  MYSQL_PASSWORD,
-  MYSQL_USER,
-} from "../constants.js";
-import ApiError from "../utils/apiErrors.js";
+import mongoose from "mongoose";
+import winston from "winston";
+import { config } from "dotenv";
 
-let connection; // Global connection variable
+config();
 
-const connectToDatabase = async (req, res) => {
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.timestamp({
+      format: "YYYY-MM-DD HH:mm:ss",
+    }),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `${timestamp} ${level}: ${message}`;
+    })
+  ),
+  transports: [new winston.transports.Console()],
+});
+
+const connectDB = async () => {
   try {
-    // If there is already a connection, use it
-    if (!connection) {
-      connection = await mysql.createConnection({
-        host: MYSQL_HOST,
-        user: MYSQL_USER,
-        password: MYSQL_PASSWORD,
-        database: MYSQL_DB_NAME,
-        port: 3306,
-      });
-
-      console.log("DATABASE CONNECTED!");
+    if (!process.env.DB_URL || !process.env.DB_NAME) {
+      throw new Error(
+        "Database connection details are missing in environment variables."
+      );
     }
-  } catch (err) {
-    // Call next with an error to use your error handling middleware
-    throw new ApiError(501, "Database connection failed", err);
-  }
-};
 
-export { connectToDatabase, connection };
+    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`);
+    logger.info("Successfully connected to the database.");
+
+  }
+  catch (err) {
+    logger.error(`Database connection failed: ${err.message}`);
+    process.exit(1); // Exit the process with failure
+
+
+  }
+}
+
+export default connectDB;
