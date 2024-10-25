@@ -34,8 +34,6 @@ const connectDB = async () => {
   catch (err) {
     logger.error(`Database connection failed: ${err.message}`);
     process.exit(1); // Exit the process with failure
-
-
   }
 }
 
