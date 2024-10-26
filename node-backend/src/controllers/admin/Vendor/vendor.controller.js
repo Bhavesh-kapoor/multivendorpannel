@@ -1,5 +1,5 @@
 
-import {User} from '../../../models/user.model.js'
+import { User } from '../../../models/user.model.js'
 import ApiError from '../../../utils/apiErrors.js';
 import ApiResponse from '../../../utils/apiResponse.js';
 import { check, validationResult } from "express-validator";
@@ -7,26 +7,26 @@ import { check, validationResult } from "express-validator";
 
 
 const validateInput = [
-  check("firstName", "First Name is required").notEmpty(),
-  check("lastName", "Last Name is required").notEmpty(),
-  check("email", "Email is required").isEmail(),
-  check("mobile", "Mobile is required").notEmpty(),
-  check("shopName", "Mobile is required").notEmpty(),
-  check("gender", "Gender is required").notEmpty(),
-  check("password", "password is required").notEmpty(),
+    check("firstName", "First Name is required").notEmpty(),
+    check("lastName", "Last Name is required").notEmpty(),
+    check("email", "Email is required").isEmail(),
+    check("mobile", "Mobile is required").notEmpty(),
+    check("shopName", "Mobile is required").notEmpty(),
+    check("gender", "Gender is required").notEmpty(),
+    check("password", "password is required").notEmpty(),
 ];
-const createVendor = async (req,res) =>{
+const createVendor = async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json(new ApiError(400, "Validation Error", errors.array()));
     }
-    const { firstName, lastName, email, mobile,gender, shopName, password,role } = req.body;
+    const { firstName, lastName, email, mobile, gender, shopName, password } = req.body;
     try {
         // Check if vendor with same email exists
         const existingVendor = await User.findOne({ email });
         if (existingVendor) {
-            return res.status(400).json(new ApiError(400,'Vendor with this email already exists',[],''));
+            return res.status(400).json(new ApiError(400, 'Vendor with this email already exists', [], ''));
         }
 
         // Naya vendor object create karo
@@ -36,7 +36,7 @@ const createVendor = async (req,res) =>{
             email,
             mobile,
             shopName,
-            role:vendor,
+            role: "vendor",
             password,
             gender
         });
@@ -46,13 +46,15 @@ const createVendor = async (req,res) =>{
 
 
         // return response
-        return res.status(201).json(new ApiResponse(200,{   firstName: vendor.firstName,
+        return res.status(201).json(new ApiResponse(200, {
+            firstName: vendor.firstName,
             lastName: vendor.lastName,
             email: vendor.email,
             shopName: vendor.shopName,
-            commissionRate: vendor.commissionRate,},"Vendor created successfully"))
+            commissionRate: vendor.commissionRate,
+        }, "Vendor created successfully"))
     } catch (error) {
-        return res.status(500).json(new ApiError(500,"Error creating vendor",[error.message],''))
+        return res.status(500).json(new ApiError(500, "Error creating vendor", [error.message], ''))
     }
 }
 
@@ -62,10 +64,10 @@ const readVendor = async (req, res) => {
     try {
         const vendor = await User.findOne({ email, role: "vendor" });
         if (!vendor) {
-            return res.status(404).json(new ApiError(404,'Vendor not found',[],''));
+            return res.status(404).json(new ApiError(404, 'Vendor not found', [], ''));
         }
 
-        return res.status(200).json(new ApiResponse(200,{
+        return res.status(200).json(new ApiResponse(200, {
             firstName: vendor.firstName,
             lastName: vendor.lastName,
             email: vendor.email,
@@ -73,11 +75,11 @@ const readVendor = async (req, res) => {
             address: vendor.address,
             shopName: vendor.shopName,
             commissionRate: vendor.commissionRate,
-        },'Vendor Fetched Successfully'))
+        }, 'Vendor Fetched Successfully'))
 
-      
+
     } catch (error) {
-     return   res.status(500).json(new ApiError(500,'Error reading vendor',[error.message],''));
+        return res.status(500).json(new ApiError(500, 'Error reading vendor', [error.message], ''));
     }
 };
 
@@ -122,11 +124,11 @@ const updateVendor = async (req, res) => {
         );
 
         if (!updatedVendor) {
-        return res.status(404).json(new ApiError(404,'Vendor not found',[],''))
+            return res.status(404).json(new ApiError(404, 'Vendor not found', [], ''))
         }
 
         // Return updated vendor data in the response
-        return res.status(200).json(new ApiResponse(200,{
+        return res.status(200).json(new ApiResponse(200, {
             firstName: updatedVendor.firstName,
             lastName: updatedVendor.lastName,
             email: updatedVendor.email,
@@ -134,10 +136,10 @@ const updateVendor = async (req, res) => {
             address: updatedVendor.address,
             shopName: updatedVendor.shopName,
             commissionRate: updatedVendor.commissionRate,
-        },'Vendor updated successfully'))
-        
+        }, 'Vendor updated successfully'))
+
     } catch (error) {
-        return res.status(500).json(new ApiError(500,'Error updating vendor',[],''))
+        return res.status(500).json(new ApiError(500, 'Error updating vendor', [], ''))
 
     }
 };
@@ -148,15 +150,15 @@ const deleteVendor = async (req, res) => {
     try {
         const vendor = await User.findOneAndDelete({ email, role: "vendor" });
         if (!vendor) {
-            return res.status(404).json(new ApiError(404,'Vendor not found',[],''));
+            return res.status(404).json(new ApiError(404, 'Vendor not found', [], ''));
         }
 
-       return  res.status(200).json(new ApiResponse(200,{},'Vendor deleted successfully'));
+        return res.status(200).json(new ApiResponse(200, {}, 'Vendor deleted successfully'));
     } catch (error) {
-       return res.status(500).json(new ApiError(500,'Error deleting vendor',[],''));
+        return res.status(500).json(new ApiError(500, 'Error deleting vendor', [], ''));
     }
 };
 
 
 
-export {createVendor,readVendor,updateVendor,deleteVendor,readAllVendors}
+export { createVendor, readVendor, updateVendor, deleteVendor, readAllVendors }
