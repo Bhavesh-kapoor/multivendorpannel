@@ -5,7 +5,6 @@ import ApiResponse from "../../../utils/apiResponse.js";
 import { isValidObjectId } from "../../../utils/mongoose.utility.js";
 import asyncHandler from "../../../utils/aysncHandler.js";
 
-
 const productValidationRules = [
     check('name').notEmpty().withMessage('Product name is required'),
     check('brandName').notEmpty().withMessage('Brand name is required'),

@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
-import { mailOptions, transporter} from "../config/nodeMailerConfig.js";
+import { mailOptions, transporter } from "../config/nodeMailerConfig.js";
 
 /*------------------------------------------to check objectId valid--------------------------------------*/
-const validObjectId = (id) => {
-    return mongoose.Types.ObjectId.isValid(id) ? true : false;
+const isValidObjectId = (id) => {
+    return mongoose.Types.ObjectId.isValid(id)
 }
 /*------------------------------------------to generate tokens-------------------------------------------*/
 
@@ -17,7 +17,7 @@ const createAccessOrRefreshToken = async (user_id) => {
     return { accessToken, refreshToken };
 };
 
- const sendMail = (receiverEmail, subject, htmlContent) => {
+const sendMail = (receiverEmail, subject, htmlContent) => {
     const options = mailOptions(receiverEmail, subject, htmlContent);
     transporter.sendMail(options, (error, info) => {
         if (error) {
@@ -27,4 +27,4 @@ const createAccessOrRefreshToken = async (user_id) => {
         }
     });
 }
-export { validObjectId, createAccessOrRefreshToken,sendMail };
+export { isValidObjectId, createAccessOrRefreshToken, sendMail };

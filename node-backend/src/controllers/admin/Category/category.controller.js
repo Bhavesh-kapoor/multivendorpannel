@@ -4,7 +4,7 @@ import ApiError from "../../../utils/apiErrors.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import Category from "../../../models/category.model.js";
 import mongoose from "mongoose";
-import { validObjectId } from "../../../utils/helpers.js";
+import { isValidObjectId } from "../../../utils/helpers.js";
 
 
 // Validation rules
@@ -61,7 +61,7 @@ const store = async (req, res) => {
 }
 const update = async (req, res) => {
     const { _id } = req.params;
-    if (!validObjectId(_id)) {
+    if (!isValidObjectId(_id)) {
         return res.status(400).json(new ApiError(400, '', 'Invalid Category ID!'));
     }
     try {
@@ -89,7 +89,7 @@ const update = async (req, res) => {
 
 const categoryById = async (req, res) => {
     const { _id } = req.params;
-    if (!validObjectId(_id)) {
+    if (!isValidObjectId(_id)) {
         return res.status(400).json(new ApiError(400, '', 'Invalid Category ID!'));
 
     }
@@ -101,7 +101,7 @@ const categoryById = async (req, res) => {
 
 const deleteCategoryById = async (req, res) => {
     const { _id } = req.params;
-    if (!validObjectId(_id)) {
+    if (!isValidObjectId(_id)) {
         return res.status(400).json(new ApiError(400, '', 'Invalid Category ID!'));
     }
     let findCategory = await Category.findByIdAndDelete(_id);

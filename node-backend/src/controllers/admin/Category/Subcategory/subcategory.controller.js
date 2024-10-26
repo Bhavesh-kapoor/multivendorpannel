@@ -3,7 +3,7 @@ import { validationResult, check } from "express-validator";
 import ApiError from "../../../../utils/apiErrors.js";
 import ApiResponse from "../../../../utils/apiResponse.js";
 import Subcategory from "../../../../models/subcategories.model.js";
-import { validObjectId } from "../../../../utils/helpers.js";
+import { isValidObjectId } from "../../../../utils/helpers.js";
 
 
 
@@ -65,11 +65,11 @@ const store = async (req, res) => {
 }
 const update = async (req, res) => {
     const { _id } = req.params;
-    if (!validObjectId(_id)) {
+    if (!isValidObjectId(_id)) {
         return res.status(400).json(new ApiError(400, '', 'Invalid Subcategory ID!'));
     }
     try {
-        const Subcateg =  await Subcategory.findByIdAndUpdate(
+        const Subcateg = await Subcategory.findByIdAndUpdate(
             _id,
             req.body,
             { new: true, runValidators: true }
@@ -95,7 +95,7 @@ const update = async (req, res) => {
 
 const SubcategoryById = async (req, res) => {
     const { _id } = req.params;
-    if (!validObjectId(_id)) {
+    if (!isValidObjectId(_id)) {
         return res.status(400).json(new ApiError(400, '', 'Invalid  Sub Category ID!'));
 
     }
@@ -107,7 +107,7 @@ const SubcategoryById = async (req, res) => {
 
 const deleteSubCategoryById = async (req, res) => {
     const { _id } = req.params;
-    if (!validObjectId(_id)) {
+    if (!isValidObjectId(_id)) {
         return res.status(400).json(new ApiError(400, '', 'Invalid  Sub Category ID!'));
     }
     let subCategoryFind = await Subcategory.findByIdAndDelete(_id);
