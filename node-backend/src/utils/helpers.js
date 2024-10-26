@@ -5,7 +5,6 @@ import { mailOptions, transporter} from "../config/nodeMailerConfig.js";
 /*------------------------------------------to check objectId valid--------------------------------------*/
 const validObjectId = (id) => {
     return mongoose.Types.ObjectId.isValid(id) ? true : false;
-
 }
 /*------------------------------------------to generate tokens-------------------------------------------*/
 
