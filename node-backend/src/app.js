@@ -25,6 +25,5 @@ app.use('/api', integratedroutes)
 
 
 //vendor api
-app.use("/api/vendor",vendorsRoute)
 
 export default app;
