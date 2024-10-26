@@ -1,27 +1,10 @@
-
 import {User} from '../../../models/user.model.js'
 import ApiError from '../../../utils/apiErrors.js';
 import ApiResponse from '../../../utils/apiResponse.js';
-import { check, validationResult } from "express-validator";
 
-
-
-const validateInput = [
-  check("firstName", "First Name is required").notEmpty(),
-  check("lastName", "Last Name is required").notEmpty(),
-  check("email", "Email is required").isEmail(),
-  check("mobile", "Mobile is required").notEmpty(),
-  check("shopName", "Mobile is required").notEmpty(),
-  check("gender", "Gender is required").notEmpty(),
-  check("password", "password is required").notEmpty(),
-];
 const createVendor = async (req,res) =>{
+    const { firstName, lastName, email, mobile, address, shopName, commissionRate, password } = req.body;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json(new ApiError(400, "Validation Error", errors.array()));
-    }
-    const { firstName, lastName, email, mobile,gender, shopName, password,role } = req.body;
     try {
         // Check if vendor with same email exists
         const existingVendor = await User.findOne({ email });
@@ -35,10 +18,11 @@ const createVendor = async (req,res) =>{
             lastName,
             email,
             mobile,
+            address,
             shopName,
-            role:vendor,
+            commissionRate,
+            role: "vendor",
             password,
-            gender
         });
 
         // Vendor ko database mein save karo
@@ -158,7 +142,4 @@ const deleteVendor = async (req, res) => {
 };
 
 
-
-
-
-export {createVendor,readVendor,updateVendor,deleteVendor,readAllVendors}
+export { createVendor, readVendor, updateVendor, deleteVendor, readAllVendors }
