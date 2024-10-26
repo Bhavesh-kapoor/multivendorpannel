@@ -45,7 +45,7 @@ const rating = async (req, res) => {
   }
 }
 
-const getAllRating = async (req,res) =>{
+const   getAllRating = async (req,res) =>{
  
     try {
         // Populate the user and product details if needed

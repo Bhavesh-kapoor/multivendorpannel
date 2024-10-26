@@ -50,10 +50,10 @@ const readVendor = async (req, res) => {
         }
 
         return res.status(200).json(new ApiResponse(200,{
-            firstName: vendor.firstName,
+            firstName: vendor.firstName,    
             lastName: vendor.lastName,
             email: vendor.email,
-            mobile: vendor.mobile,
+            mobile: vendor.mobile,  
             address: vendor.address,
             shopName: vendor.shopName,
             commissionRate: vendor.commissionRate,
