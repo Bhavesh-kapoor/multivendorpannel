@@ -2,6 +2,7 @@ import ApiError from "../../../utils/apiErrors.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 
 const globalDe = async (req, res) => {
+  console.log('joooo')
     // let { id, table } = req.body;
     // try {
     //     await connection.query(`DELETE FROM ${table} where id = ? `, [id]);
