@@ -2,8 +2,9 @@ import { Router } from "express";
 import categoryRoute from "./category.route.js";
 import productRoutes from "./product.route.js";
 import vendorRoutes from "./vendor.route.js"
-
 import subCategoryRoutes from './sub-category.route.js';
+import authRoute from "./auth.route.js";
+
 import blogroutes from "./cms/blogs.route.js";
 const route = Router();
 
