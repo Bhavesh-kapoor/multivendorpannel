@@ -18,8 +18,7 @@ const createAccessOrRefreshToken = async (user_id) => {
     return { accessToken, refreshToken };
 };
 
-
-export const sendMail = (receiverEmail, subject, htmlContent) => {
+ const sendMail = (receiverEmail, subject, htmlContent) => {
     const options = mailOptions(receiverEmail, subject, htmlContent);
     transporter.sendMail(options, (error, info) => {
         if (error) {
@@ -29,5 +28,4 @@ export const sendMail = (receiverEmail, subject, htmlContent) => {
         }
     });
 }
-
-export { validObjectId, createAccessOrRefreshToken };import { response } from "express";
+export { validObjectId, createAccessOrRefreshToken,sendMail };
