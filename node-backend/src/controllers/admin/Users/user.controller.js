@@ -22,4 +22,11 @@ const logout = (req, res) => {
   res.redirect('/auth/login');
 
 }
-export { index, create, logout };
+
+const rating = (req,res) =>{
+  const productId = req.body
+  
+}
+
+
+export { index, create, logout,rating };
