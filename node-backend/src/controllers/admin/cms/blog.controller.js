@@ -5,6 +5,8 @@ import asyncHandler from "../../../utils/aysncHandler.js";
 import ApiError from "../../../utils/apiErrors.js";
 import { Blog } from "../../../models/cms/blogs.model.js";
 import ApiResponse from "../../../utils/apiResponse.js";
+import { isValidObjectId } from "mongoose";
+import { validObjectId } from "../../../utils/helpers.js";
 const blogValidator = [
     body('title')
         .trim()
@@ -65,6 +67,8 @@ const blogValidator = [
         .isIn(['index', 'noindex']).withMessage('Robots field must be either index or noindex'),
 ];
 
+
+
 const creatBlog = asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -90,4 +94,53 @@ const creatBlog = asyncHandler(async (req, res) => {
 });
 
 
-export { creatBlog, blogValidator };
+const getAllBlogs = asyncHandler(async (req, res) => {
+    const getall = await Blog.find().sort({ _id: -1 });
+    return res.status(200).json(new ApiResponse(200, getall, 'Blogs Fetched Successfully!'));
+
+});
+
+
+const deleteBlogs = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!validObjectId(id)) {
+        return res.status(400).json(new ApiError(400, '', 'Invalid Blog ID!'));
+
+    } else {
+        const blogDeletion = await Blog.findByIdAndDelete(id);
+        return res.status(200).json(new ApiResponse(200, blogDeletion, 'Blog Deleted Successfully!'));
+    }
+});
+
+
+const updateBlog = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!validObjectId(id)) {
+        return res.status(400).json(new ApiError(400, '', 'Invalid Blog ID!'));
+
+    }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json(new ApiError(400, "Validation Error", errors.array()));
+
+    } else {
+        const { title, content, slug, author, tags, featured_image, status, seo } = req.body;
+
+        const newBlog = await Blog.findByIdAndUpdate(id, {
+            title,
+            slug,
+            content,
+            author,
+            tags,
+            featured_image,
+            status,
+            seo,
+        }, { new: true });
+        return res.status(200).json(new ApiResponse(200, newBlog, 'Blog Updated  Successfully!'));
+    }
+
+
+});
+
+
+export { creatBlog, blogValidator, getAllBlogs, deleteBlogs, updateBlog };
