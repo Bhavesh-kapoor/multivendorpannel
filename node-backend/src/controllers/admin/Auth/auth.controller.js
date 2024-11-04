@@ -111,15 +111,9 @@ const loginHandler = async (req, res) => {
   // }
 };
 
+const  getuserinfo = (async(req,res)=>{
+  return res.status(200).json(new ApiResponse(200, 'User info', req.user));
 
+});
 
-async function verifyPassword(plainPassword, hashedPassword) {
-  // try {
-  //   const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
-  //   return isMatch; // true if passwords match, false otherwise
-  // } catch (error) {
-  //   console.error("Error verifying password:", error);
-  //   return false;
-  // }
-}
-export { login, loginHandler };
+export { login, loginHandler,getuserinfo };
