@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { createVendor, deleteVendor, readAllVendors, readVendor, updateVendor } from "../controllers/admin/Vendor/vendor.controller.js";
+import { createVendor, deleteVendor, readAllVendors, readVendor, updateVendor, vendorValidations } from "../controllers/admin/Vendor/vendor.controller.js";
 const vendorsRoute = Router();
 
 
-vendorsRoute.post("/",createVendor)
+vendorsRoute.post("/",vendorValidations , createVendor)
 vendorsRoute.get("/",readAllVendors)
 vendorsRoute.get("/:email",readVendor)
-vendorsRoute.put("/:email",updateVendor)  
-vendorsRoute.delete("/:email",deleteVendor)
+vendorsRoute.put("/:_id",updateVendor)  
+vendorsRoute.delete("/:_id",deleteVendor)
 
 
 export default vendorsRoute
