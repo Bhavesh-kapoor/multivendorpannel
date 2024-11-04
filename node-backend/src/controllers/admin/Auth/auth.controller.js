@@ -111,9 +111,10 @@ const loginHandler = async (req, res) => {
   // }
 };
 
-const  getuserinfo = (async(req,res)=>{
-  return res.status(200).json(new ApiResponse(200, 'User info', req.user));
+const getuserinfo = (async (req, res) => {
+  
+  return res.status(200).json(new ApiResponse(200,  req.user,'User info'));
 
 });
 
-export { login, loginHandler,getuserinfo };
+export { login, loginHandler, getuserinfo };
