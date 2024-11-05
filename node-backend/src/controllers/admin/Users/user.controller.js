@@ -84,7 +84,7 @@ const permissions = asyncHandler(async (req, res) => {
       { $set: { allowedTabs } }, // Ensure the object structure is correct
       { new: true, runValidators: true } // Options for returning the updated document and running validators
     );
-    return res.status(201).json(new ApiResponse(201, updateUserPermissions, 'User Updated Successfully!'));
+    return res.status(200).json(new ApiResponse(200, updateUserPermissions, 'User Updated Successfully!'));
   }
 
 });
