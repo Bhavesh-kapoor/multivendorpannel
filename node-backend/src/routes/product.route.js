@@ -18,5 +18,6 @@ const router = new Router();
 // router.get("/get-all", getAllProducts)
 
 router.post("/product", addProduct);
+router.get("/product", getAllProducts);
 
 export default router;

@@ -220,7 +220,10 @@ const getAllProducts = asyncHandler(async (req, res) => {
   const pageNumber = parseInt(page);
   const limitNumber = parseInt(limit);
   const skip = (pageNumber - 1) * limitNumber;
-  const products = await Product.find().skip(skip).limit(limitNumber);
+  const products = await Product.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limitNumber);
   const totalProducts = await Product.countDocuments();
   return res.status(200).json(
     new ApiResponse(
