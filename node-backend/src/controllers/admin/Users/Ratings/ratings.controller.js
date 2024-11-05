@@ -46,8 +46,77 @@ const store = asyncHandler(async (req, res) => {
 
 
 const all = asyncHandler(async (req, res) => {
-    const getRatings = await Rating.find();
-    return res.status(200).json(new ApiResponse(200, 'Rating Fetched successfully!', getRatings));
+
+
+    let { page = 1, limit = 10 } = req.query;
+    const pageNumber = parseInt(page);
+    if (limit <= 0) {
+        limit = 10;
+    }
+    const limitNumber = parseInt(limit);
+    const skip = (pageNumber - 1) * limitNumber;
+
+
+
+
+
+
+
+    const getRatings = await Rating.aggregate([
+        {
+            $lookup: {
+                'from': "users",
+                'localField': 'userId',
+                'foreignField': '_id',
+                'as': "user"
+
+            },
+        },
+        {
+            $unwind: '$user',
+        },
+        {
+            $project: {
+                '_id': 1,
+                'rating': 1,
+                'comment': 1,
+                'isPublish': 1,
+                'fullName': { $concat: ['$user.firstName', ' ', '$user.lastName'] },
+
+
+            }
+        },
+        {
+            $addFields: {
+                productName: {
+                    $literal: ''
+                }
+            }
+        },
+        {
+            $skip: skip
+        },
+        {
+            $limit: limitNumber
+        },
+        {
+            $sort: {
+                _id: 1
+            }
+        }
+
+    ]);
+    const totalRatings = await Rating.countDocuments();
+
+    return res.status(200).json(new ApiResponse(200, {
+        result: getRatings,
+        pagination: {
+            currentPage: pageNumber,
+            totalPages: Math.ceil(totalRatings / limitNumber),
+            totalItems: totalRatings,
+            itemsPerPage: limitNumber
+        }
+    }, 'Rating Fetched successfully!'));
 
 
 });
@@ -77,20 +146,22 @@ const publish = asyncHandler(async (req, res) => {
 
 const deleteRating = asyncHandler(async (req, res) => {
 
+    console.log(req.params);
 
-    const { rating_id } = req.body;
+    const { _id } = req.params;
+    console.log(_id);
 
-    if (!isValidObjectId(rating_id)) {
+    if (!isValidObjectId(_id)) {
         return res.status(400).json(new ApiError(400, '', 'Invalid Rating ID!'));
     }
 
-    const getRatings = await Rating.findByIdAndDelete(rating_id);
+    const getRatings = await Rating.findByIdAndDelete(_id);
     return res.status(200).json(new ApiResponse(200, 'Rating Deleted successfully!', getRatings));
 
 
 
 });
 
-export { store, validateRatings, all, publishValidations, publish ,deleteRating}
+export { store, validateRatings, all, publishValidations, publish, deleteRating }
 
 

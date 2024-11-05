@@ -5,9 +5,9 @@ import verifyJwtToken from "../middleware/auth.middleware.js";
 const ratingRoutes = Router();
 
 ratingRoutes.post('/store', validateRatings, store);
-ratingRoutes.get('/all', verifyJwtToken, all);
+ratingRoutes.get('/all',verifyJwtToken, all);
 ratingRoutes.put('/publish',verifyJwtToken, publishValidations, publish);
-ratingRoutes.delete('/', deleteRating);
+ratingRoutes.delete('/delete/:_id', deleteRating);
 
 
 export default ratingRoutes;
