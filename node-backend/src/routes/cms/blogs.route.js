@@ -1,11 +1,11 @@
 import { Router } from "express";
 
 
-import { blogValidator, creatBlog } from "../../controllers/admin/cms/blog.controller.js";
+import { blogValidator, creatBlog, getAllBlogs ,deleteBlogs, updateBlog } from "../../controllers/admin/cms/blog.controller.js";
 const blogroutes = Router();
 
 // // GET all blogs (with optional filtering by category, author, or tags)
-// blogroutes.get('/', BlogController.getAllBlogs);
+blogroutes.get('/', getAllBlogs);
 
 // // GET a specific blog by slug or ID
 // blogroutes.get('/:slugOrId', BlogController.getBlogBySlugOrId);
@@ -14,10 +14,10 @@ const blogroutes = Router();
 blogroutes.post('/create', blogValidator, creatBlog);
 
 // // PUT (Update) an existing blog by ID
-// blogroutes.put('/:id', BlogController.updateBlog);
+blogroutes.put('/:id', updateBlog);
 
 // // DELETE a blog by ID
-// blogroutes.delete('/:id', BlogController.deleteBlog);
+blogroutes.delete('/delete/:id', deleteBlogs);
 
 // // SEO: GET SEO metadata for a blog by ID
 // blogroutes.get('/:id/seo', BlogController.getBlogSEO);

@@ -19,7 +19,43 @@ const validateSubCategory = [
 ];
 
 const index = async (req, res) => {
-    const getAllSubCategories = await Subcategory.find().sort({ _id: 1 });
+    // const getAllSubCategories = await Subcategory.find().sort({ _id: 1 });
+    const getAllSubCategories = await Subcategory.aggregate(
+        [
+            {
+                $lookup: {
+                    'from': "categories",
+                    'localField': 'categoryId',
+                    'foreignField': '_id',
+                    'as': "category"
+
+                },
+            },
+            {
+                $unwind: '$category',
+            },
+            {
+                $project: {
+                    '_id': 1,
+                    'name': 1,
+                    'isActive': 1,
+                    'createdAt': 1,
+                    'category._id': 1,
+                    'category.name': 1
+                }
+            },
+            {
+                $sort: {
+                    _id: 1
+                }
+            }
+
+        ]
+    )
+
+
+
+    // find().sort({ _id: 1 });
     return res.status(200).json(new ApiResponse(200, getAllSubCategories, 'Sub Category Fetched Successfully!'));
 
 };
