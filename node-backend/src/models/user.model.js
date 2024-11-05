@@ -3,6 +3,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 
+const allowedTabs = new mongoose.Schema({
+    name: {
+        type: String,
+    },
+    crudRoles: {
+        type: [String],
+        enum: ["Read", "Create", "Edit", "Delete"],
+    }
+}, { _id: false });
 const userSchema = new Schema(
     {
         firstName: { type: String, required: true, trim: true },
@@ -43,7 +52,8 @@ const userSchema = new Schema(
         },
         shopName: {
             type: String,
-        }
+        },
+        allowedTabs: [allowedTabs]
     },
     { timestamps: true }
 );

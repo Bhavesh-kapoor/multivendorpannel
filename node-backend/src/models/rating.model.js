@@ -21,6 +21,12 @@ const ratingSchema = new Schema({
         type: String,
         trim: true,
         maxlength: 500
+    },
+    isPublish: {
+        type: Number,
+        enum: [0, 1], // 0 means not publish and 1 is published 
+        default: 0,
+
     }
 }, {
     timestamps: true  // Automatically add createdAt and updatedAt fields
