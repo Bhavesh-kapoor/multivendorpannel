@@ -47,4 +47,8 @@ app.use((req, res, next) => {
 // Handle API Routes
 app.use("/api", integratedroutes);
 
+app.use((request, response) => {
+  response.status(404).json({ success: false, message: "Route Not Found" });
+});
+
 export default app;
