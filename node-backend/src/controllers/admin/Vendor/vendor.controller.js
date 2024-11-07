@@ -108,28 +108,36 @@ const readVendor = async (req, res) => {
   }
 };
 
-// const readAllVendors = async (req, res) => {
-//   try {
-//     // Fetch all vendors with role "vendor"
-//     const vendors = await User.find(); // Profile Image,fullName,_id,email,phoneNumber,Role,created_At
-
-//     // Check if any vendors were found
-//     if (!vendors.length) {
-//       return res
-//         .status(404)
-//         .json(new ApiError(404, "No vendors found", [], ""));
-//     }
-
-//     // Return the list of vendors
-//     return res
-//       .status(200)
-//       .json(new ApiResponse(200, vendors, "Vendors fetched successfully"));
-//   } catch (error) {
-//     return res
-//       .status(500)
-//       .json(new ApiError(500, "Error reading vendors", [error.message], ""));
-//   }
-// };
+export const getUserById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await User.findOne(
+      { _id: id },
+      {
+        role: 1,
+        email: 1,
+        mobile: 1,
+        gender: 1,
+        lastName: 1,
+        firstName: 1,
+        dateOfBirth: 1,
+        profileImage: 1,
+      }
+    );
+    if (!result) {
+      return res
+        .status(404)
+        .json(new ApiError(404, "Vendor not found", [], ""));
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, result, "Data Fetched Successfully"));
+  } catch (error) {
+    return res
+      .status(500)
+      .json(new ApiError(500, "Error reading vendor", [error.message], ""));
+  }
+};
 
 const readAllVendors = async (req, res) => {
   const {
@@ -144,49 +152,72 @@ const readAllVendors = async (req, res) => {
     sortdir = "desc",
   } = req.query;
 
-  // const { role } = req.user;
-  // console.log(role);
+  const { role } = req.user;
+  const pageNumber = parseInt(page);
+  const limitNumber = parseInt(limit);
 
   try {
-    let filter = { role: "vendor" };
+    const pipeline = [];
+    const matchStage = {};
 
-    if (search && searchkey) {
-      filter = { ...filter, [searchkey]: search };
-    }
+    if (role !== "admin") matchStage.role = role;
+    if (search && searchkey)
+      matchStage[searchkey] = { $regex: search, $options: "i" };
 
-    if (status) {
-      filter = { ...filter, status: status };
-    }
+    if (status) matchStage.status = status;
 
     if (startDate || endDate) {
-      if (startDate) {
-        filter = { ...filter, created_at: { $gte: new Date(startDate) } };
-      }
-
-      if (endDate) {
-        filter = { ...filter, created_at: { $lte: new Date(endDate) } };
-      }
+      matchStage.created_at = {};
+      if (startDate) matchStage.created_at.$gte = new Date(startDate);
+      if (endDate) matchStage.created_at.$lte = new Date(endDate);
     }
 
-    const skip = (page - 1) * limit;
+    if (Object.keys(matchStage).length > 0)
+      pipeline.push({ $match: matchStage });
 
-    const sort = { [sortkey]: sortdir === "asc" ? 1 : -1 };
+    const sortStage = {
+      $sort: { [sortkey]: sortdir === "asc" ? 1 : -1 },
+    };
+    pipeline.push(sortStage);
+    pipeline.push({ $skip: (pageNumber - 1) * limitNumber });
+    pipeline.push({ $limit: limitNumber });
 
-    const vendors = await User.find(filter)
-      .select("profileImage firstName lastName _id email mobile role createdAt")
-      .skip(skip)
-      .limit(Number(limit))
-      .sort(sort);
+    pipeline.push({
+      $project: {
+        _id: 1,
+        email: 1,
+        role: 1,
+        mobile: 1,
+        lastName: 1,
+        createdAt: 1,
+        firstName: 1,
+        profileImage: 1,
+      },
+    });
+
+    const vendors = await User.aggregate(pipeline);
+    const totalUsers = await User.countDocuments();
 
     if (!vendors.length) {
       return res
         .status(404)
         .json(new ApiError(404, "No vendors found", [], ""));
     }
-
-    return res
-      .status(200)
-      .json(new ApiResponse(200, vendors, "Vendors fetched successfully"));
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          result: vendors,
+          pagination: {
+            currentPage: pageNumber,
+            totalItems: totalUsers,
+            itemsPerPage: limitNumber,
+            totalPages: Math.ceil(totalUsers / limitNumber),
+          },
+        },
+        "Vendors fetched successfully"
+      )
+    );
   } catch (error) {
     return res
       .status(500)
