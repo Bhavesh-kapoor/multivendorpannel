@@ -114,19 +114,82 @@ const readVendor = async (req, res) => {
   }
 };
 
-const readAllVendors = async (req, res) => {
-  try {
-    // Fetch all vendors with role "vendor"
-    const vendors = await User.find(); // Profile Image,fullName,_id,email,phoneNumber,Role,created_At
+// const readAllVendors = async (req, res) => {
+//   try {
+//     // Fetch all vendors with role "vendor"
+//     const vendors = await User.find(); // Profile Image,fullName,_id,email,phoneNumber,Role,created_At
 
-    // Check if any vendors were found
+//     // Check if any vendors were found
+//     if (!vendors.length) {
+//       return res
+//         .status(404)
+//         .json(new ApiError(404, "No vendors found", [], ""));
+//     }
+
+//     // Return the list of vendors
+//     return res
+//       .status(200)
+//       .json(new ApiResponse(200, vendors, "Vendors fetched successfully"));
+//   } catch (error) {
+//     return res
+//       .status(500)
+//       .json(new ApiError(500, "Error reading vendors", [error.message], ""));
+//   }
+// };
+
+const readAllVendors = async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    status,
+    searchkey,
+    startDate,
+    endDate,
+    sortkey = "created_at",
+    sortdir = "desc",
+  } = req.query;
+
+  // const { role } = req.user;
+  // console.log(role);
+
+  try {
+    let filter = { role: "vendor" };
+
+    if (search && searchkey) {
+      filter = { ...filter, [searchkey]: search };
+    }
+
+    if (status) {
+      filter = { ...filter, status: status };
+    }
+
+    if (startDate || endDate) {
+      if (startDate) {
+        filter = { ...filter, created_at: { $gte: new Date(startDate) } };
+      }
+
+      if (endDate) {
+        filter = { ...filter, created_at: { $lte: new Date(endDate) } };
+      }
+    }
+
+    const skip = (page - 1) * limit;
+
+    const sort = { [sortkey]: sortdir === "asc" ? 1 : -1 };
+
+    const vendors = await User.find(filter)
+      .select("profileImage firstName lastName _id email mobile role createdAt")
+      .skip(skip)
+      .limit(Number(limit))
+      .sort(sort);
+
     if (!vendors.length) {
       return res
         .status(404)
         .json(new ApiError(404, "No vendors found", [], ""));
     }
 
-    // Return the list of vendors
     return res
       .status(200)
       .json(new ApiResponse(200, vendors, "Vendors fetched successfully"));
