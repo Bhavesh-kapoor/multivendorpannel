@@ -3,6 +3,7 @@ import cors from "cors";
 import colors from "colors";
 import helmet from "helmet";
 import express from "express";
+import cookieParser from "cookie-parser";
 import { logger } from "./config/logger.js";
 import integratedroutes from "./routes/integrated.route.js";
 import { corsOptions } from "./middleware/corsMiddleware.js";
@@ -11,10 +12,12 @@ const app = express();
 
 // Middleware
 app.use(helmet());
+app.use(cookieParser());
 app.use(cors(corsOptions));
 
 // Middleware for parsing JSON and URL-encoded bodies
 app.use(express.json());
+app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
 // Logging Middleware
