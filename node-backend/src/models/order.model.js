@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.schema(
+const orderSchema = new mongoose.Schema(
   {
     orderid: {
       type: String,

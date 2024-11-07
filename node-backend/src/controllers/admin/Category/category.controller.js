@@ -46,7 +46,7 @@ const store = async (req, res) => {
                     new ApiResponse(
                         201,
                         categoryCreate,
-                        " Category has been created successfully!"
+                        "Category has been created successfully!"
                     )
                 );
         }
