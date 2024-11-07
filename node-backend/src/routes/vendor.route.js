@@ -15,9 +15,9 @@ const vendorsRoute = Router();
 
 vendorsRoute.post(
   "/",
-  vendorValidations,
   multerUpload.single("profileImage"),
   uploadToCloudinary,
+  vendorValidations,
   createVendor
 );
 

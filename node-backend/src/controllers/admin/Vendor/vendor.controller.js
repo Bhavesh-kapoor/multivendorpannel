@@ -43,19 +43,19 @@ const createVendor = async (req, res) => {
     }
     const shopdetails = { gst: gst, name: shopName, shopType: shopType };
     const vendor = new User({
-      gst,
       email,
       mobile,
       gender,
       lastName,
-      shopName,
-      shopType,
       isActive,
       firstName,
       dateOfBirth,
       shopdetails,
       profileImage,
       role: "vendor",
+      gst: gst ?? "",
+      shopName: shopName ?? "",
+      shopType: shopType ?? "",
     });
     const vendorcreated = await vendor.save();
     return res
@@ -251,10 +251,12 @@ const updateVendor = asyncHandler(async (req, res) => {
   const profileImage = (cloudinaryUrls && cloudinaryUrls["profileImage"]) || "";
 
   const existingVendor = await User.findById(_id);
-  if (profileImage) await deleteImageByUrl(existingVendor.profileImage);
 
   if (!existingVendor)
     return res.status(404).json(new ApiError(404, null, "Vendor not found"));
+
+  if (profileImage && existingVendor.profileImage)
+    await deleteImageByUrl(existingVendor.profileImage);
 
   if (existingVendor.role !== "vendor") {
     return res

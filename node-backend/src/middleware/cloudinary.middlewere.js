@@ -12,7 +12,7 @@ const uploadSingleFile = async (file) => {
     return response.url;
   } catch (error) {
     fs.unlinkSync(file.path); // Delete local file if upload fails
-    throw new ApiError(500, "Single file upload to Cloudinary failed", [
+    throw new ApiError(500, null, "Single file upload to Cloudinary failed", [
       error.message,
     ]);
   }
@@ -30,9 +30,12 @@ const uploadMultipleFiles = async (files) => {
         return response.url;
       } catch (error) {
         fs.unlinkSync(file.path); // Delete local file if upload fails
-        throw new ApiError(500, "Multiple file upload to Cloudinary failed", [
-          error.message,
-        ]);
+        throw new ApiError(
+          500,
+          null,
+          "Multiple file upload to Cloudinary failed",
+          [error.message]
+        );
       }
     })
   );
