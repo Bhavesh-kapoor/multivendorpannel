@@ -1,9 +1,9 @@
-import { check, validationResult } from "express-validator";
+import { body, check, validationResult } from "express-validator";
 import { User } from "../../../models/user.model.js";
 import ApiError from "../../../utils/apiErrors.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import { isValidObjectId } from "../../../utils/helpers.js";
-import bcrypt from "bcrypt";
+import asyncHandler from "../../../utils/aysncHandler.js";
 
 const vendorValidations = [
   check("firstName").notEmpty().withMessage("First Name is required!"),
@@ -30,6 +30,8 @@ const createVendor = async (req, res) => {
     mobile,
     address,
     shopName,
+    gst,
+    shopType,
     commissionRate,
     password,
     allowedTabs,
@@ -45,7 +47,11 @@ const createVendor = async (req, res) => {
           new ApiError(400, "Vendor with this email already exists", [], "")
         );
     }
-
+    shopdetails = {
+      name: shopName,
+      gst: gst,
+      shopType: shopType,
+    };
     // Naya vendor object create karo
     const vendor = new User({
       firstName,
@@ -53,7 +59,7 @@ const createVendor = async (req, res) => {
       email,
       mobile,
       address,
-      shopName,
+      shopdetails,
       commissionRate,
       role: "vendor",
       password,
@@ -225,65 +231,105 @@ const readAllVendors = async (req, res) => {
   }
 };
 
-const updateVendor = async (req, res) => {
+const updateVendor = asyncHandler(async (req, res) => {
   const { _id } = req.params;
   if (!isValidObjectId(_id)) {
-    return res.status(400).json(new ApiError(400, "", "Invalid vendor  ID!"));
+    return res.status(400).json(new ApiError(400, "Invalid vendor ID"));
   }
 
-  const {
-    firstName,
-    lastName,
-    mobile,
-    address,
-    shopName,
-    commissionRate,
-    password,
-    allowedTabs,
-  } = req.body;
+  const { firstName, lastName, mobile, shopdetails, allowedTabs, isActive } =
+    req.body;
+  const existingVendor = await User.findById(_id);
+  if (!existingVendor) {
+    return res.status(404).json(new ApiError(404, null, "Vendor not found"));
+  }
+  if (existingVendor.role !== "vendor") {
+    return res
+      .status(400)
+      .json(new ApiError(400, null, "User is not a vendor"));
+  }
 
-  try {
-    // Prepare the update object based on provided fields
-    const updateFields = {};
-    if (firstName) updateFields.firstName = firstName;
-    if (lastName) updateFields.lastName = lastName;
-    if (mobile) updateFields.mobile = mobile;
-    if (address) updateFields.address = address;
-    if (shopName) updateFields.shopName = shopName;
-    if (commissionRate !== undefined)
-      updateFields.commissionRate = commissionRate;
-    if (allowedTabs) updateFields.allowedTabs = allowedTabs;
+  // Prepare the update object with validation
+  const updateFields = {};
 
-    // Use findOneAndUpdate to find the vendor by email and update fields
-    const updatedVendor = await User.findByIdAndUpdate(
-      { _id },
-      { $set: updateFields },
-      { new: true, runValidators: true } // Returns updated document and enforces schema validation
-    );
+  // Basic fields
+  if (firstName) updateFields.firstName = firstName;
+  if (lastName) updateFields.lastName = lastName;
+  if (mobile) updateFields.mobile = mobile;
+  if (isActive !== undefined) updateFields.isActive = isActive;
 
-    if (!updatedVendor) {
+  // Shop details validation
+  if (shopdetails) {
+    // Validate GST format
+    if (shopdetails.gst && !/^[0-9A-Z]{15}$/.test(shopdetails.gst)) {
       return res
-        .status(404)
-        .json(new ApiError(404, "Vendor not found", [], ""));
+        .status(400)
+        .json(new ApiError(400, null, "Invalid GST number format"));
     }
 
-    // Return updated vendor data in the response
-    return res.status(200).json(
+    // Validate shop type
+    if (
+      shopdetails.shopType &&
+      !["Retail", "Wholesale", "Online", "Franchise"].includes(
+        shopdetails.shopType
+      )
+    ) {
+      return res.status(400).json(new ApiError(400, null, "Invalid shop type"));
+    }
+    const updatedShopDetails = {};
+    shopdetails.name
+      ? (updatedShopDetails.name = shopdetails.name)
+      : (updatedShopDetails.name = existingVendor.shopdetails.name);
+    shopdetails.gst
+      ? (updatedShopDetails.gst = shopdetails.gst)
+      : (updatedShopDetails.gst = existingVendor.shopdetails.gst);
+    shopdetails.shopType
+      ? (updatedShopDetails.shopType = shopdetails.shopType)
+      : (updatedShopDetails.shopType = existingVendor.shopdetails.shopType);
+    // Assign the updated shop details object to updateFields
+    updateFields.shopdetails = updatedShopDetails;
+  }
+  // Allowed tabs validation
+  if (allowedTabs) {
+    const isValidTabs = allowedTabs.every(
+      (tab) =>
+        tab.name &&
+        Array.isArray(tab.crudRoles) &&
+        tab.crudRoles.every((role) =>
+          ["Read", "Create", "Edit", "Delete"].includes(role)
+        )
+    );
+
+    if (!isValidTabs) {
+      return res
+        .status(400)
+        .json(new ApiError(400, "Invalid allowed tabs format"));
+    }
+
+    updateFields.allowedTabs = allowedTabs;
+  }
+
+  // Update the vendor
+  const updatedVendor = await User.findByIdAndUpdate(
+    _id,
+    { $set: updateFields },
+    {
+      new: true,
+      runValidators: true,
+      select: "-password -refreshToken", // Exclude sensitive fields
+    }
+  );
+
+  return res
+    .status(200)
+    .json(
       new ApiResponse(
         200,
-        {
-          updatedVendor,
-        },
+        { vendor: updatedVendor },
         "Vendor updated successfully"
       )
     );
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json(new ApiError(500, "Error updating vendor", [], ""));
-  }
-};
+});
 
 const deleteVendor = async (req, res) => {
   const { _id } = req.params;

@@ -11,6 +11,11 @@ const CategorySchema = new mongoose.Schema(
             minlength: 2,
 
         },
+        description: {
+            type: String,
+            trim: true,
+            maxlength: 500
+        },
         isActive: {
             type: Boolean,
             default: true

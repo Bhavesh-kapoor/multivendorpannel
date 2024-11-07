@@ -14,6 +14,11 @@ const SubcategorySchema = new mongoose.Schema(
             ref: "Category",
             required: true,
         },
+        description: {
+            type: String,
+            trim: true,
+            maxlength: 500
+        },
         isActive: {
             type: Boolean,
             default: true

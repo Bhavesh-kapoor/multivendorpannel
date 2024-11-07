@@ -53,9 +53,6 @@ const index = async (req, res) => {
         ]
     )
 
-
-
-    // find().sort({ _id: 1 });
     return res.status(200).json(new ApiResponse(200, getAllSubCategories, 'Sub Category Fetched Successfully!'));
 
 };
