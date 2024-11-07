@@ -1,29 +1,47 @@
+import "colors";
+import cors from "cors";
+import colors from "colors";
+import helmet from "helmet";
 import express from "express";
-import authenticationRoute from "./routes/auth.route.js";
-import { index } from "./controllers/admin/dashboard.controller.js";
-import usersRoute from "./routes/users.route.js";
-import cors from 'cors';        // Use import for external libraries
-import categoryRoute from "./routes/category.route.js";
-import verifyJWTtoken from "./middleware/auth.middleware.js";
-import './utils/helpers.js';
-
+import { logger } from "./config/logger.js";
+import integratedroutes from "./routes/integrated.route.js";
+import { corsOptions } from "./middleware/corsMiddleware.js";
 
 const app = express();
 
+// Middleware
+app.use(helmet());
+app.use(cors(corsOptions));
+
+// Middleware for parsing JSON and URL-encoded bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
-import cookieParser from 'cookie-parser';
 
-import './utils/helpers.js';
-import integratedroutes from "./routes/integrated.route.js";
-app.use(cors());
-app.use(cookieParser());
+// Logging Middleware
+app.use((req, res, next) => {
+  const startTime = process.hrtime();
+  res.on("finish", () => {
+    const fetchStatus = () => {
+      if (res.statusCode >= 500) return colors.red(`${res.statusCode}`);
+      else if (res.statusCode >= 400) return colors.yellow(`${res.statusCode}`);
+      else if (res.statusCode >= 300) return colors.cyan(`${res.statusCode}`);
+      else if (res.statusCode >= 200) return colors.green(`${res.statusCode}`);
+      else return colors.white(`${res.statusCode}`);
+    };
+    const diff = process.hrtime(startTime);
+    const responseTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2);
+    logger.info(
+      `${"METHOD:".blue} ${req.method.yellow} - ${"URL:".blue} ${
+        req.originalUrl.yellow
+      } - ${"STATUS:".blue} ${fetchStatus()} - ${"Response Time:".blue} ${
+        responseTime.magenta
+      } ${"ms".magenta}`
+    );
+  });
+  next();
+});
 
-// integrated routes
-app.use('/api', integratedroutes)
-
-
-//vendor api
+// Handle API Routes
+app.use("/api", integratedroutes);
 
 export default app;
