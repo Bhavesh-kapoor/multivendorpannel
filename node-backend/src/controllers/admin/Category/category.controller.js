@@ -3,6 +3,7 @@ import { validationResult, check } from "express-validator";
 import ApiError from "../../../utils/apiErrors.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import Category from "../../../models/category.model.js";
+import asyncHandler from "../../../utils/aysncHandler.js";
 import mongoose from "mongoose";
 import { isValidObjectId } from "../../../utils/helpers.js";
 
@@ -12,7 +13,8 @@ const validateCategory = [
     check('name')
         .notEmpty().withMessage('Category name is required')
         .isLength({ min: 2 }).withMessage('Category name must be at least 2 characters long'),
-    check('isActive').notEmpty().withMessage('Category  activate or deactivation is required')
+    check('isActive').notEmpty().withMessage('Category  activate or deactivation is required'),
+    check('description').notEmpty().withMessage('Category description is required'),
 
     // You can add more validation rules as needed
 ];
@@ -21,9 +23,7 @@ const index = async (req, res) => {
     const getAllCategory = await Category.find().sort({ _id: 1 });
     return res.status(200).json(new ApiResponse(200, getAllCategory, 'Category Fetched Successfully!'));
 
-
 };
-
 
 
 const store = async (req, res) => {
@@ -31,7 +31,7 @@ const store = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json(new ApiError(400, "Validation Error", errors));
     }
-    let { name, isActive } = req.body;
+    let { name, isActive, description } = req.body;
     // now check  if the category already exist or not
     try {
         name = name.toLowerCase().trim();
@@ -39,7 +39,7 @@ const store = async (req, res) => {
         if (existingCategory) {
             return res.status(409).json(new ApiError(409, '', "Category already exist!"));
         } else {
-            const categoryCreate = await Category.create({ name, isActive });
+            const categoryCreate = await Category.create({ name, isActive, description });
             res
                 .status(201)
                 .json(
