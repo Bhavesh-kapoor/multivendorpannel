@@ -3,8 +3,8 @@ import { validationResult, check } from "express-validator";
 import ApiError from "../../../../utils/apiErrors.js";
 import ApiResponse from "../../../../utils/apiResponse.js";
 import Subcategory from "../../../../models/subcategories.model.js";
-import asyncHandler from "../../../../models/asyncHandler.js";
 import { isValidObjectId } from "../../../../utils/helpers.js";
+import asyncHandler from "../../../../utils/asyncHandler.js";
 
 
 // Validation rules
