@@ -3,7 +3,7 @@ import { validationResult, check } from "express-validator";
 import ApiError from "../../../utils/apiErrors.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import Category from "../../../models/category.model.js";
-import asyncHandler from "../../../utils/aysncHandler.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
 import mongoose from "mongoose";
 import { isValidObjectId } from "../../../utils/helpers.js";
 
@@ -24,7 +24,6 @@ const index = async (req, res) => {
     return res.status(200).json(new ApiResponse(200, getAllCategory, 'Category Fetched Successfully!'));
 
 };
-
 
 const store = async (req, res) => {
     const errors = validationResult(req);

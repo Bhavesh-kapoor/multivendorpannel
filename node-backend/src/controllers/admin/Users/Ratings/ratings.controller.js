@@ -1,11 +1,9 @@
 import { check, validationResult } from "express-validator";
-import asyncHandler from "../../../../utils/aysncHandler.js";
+import asyncHandler from "../../../../utils/asyncHandler.js";
 import ApiResponse from "../../../../utils/apiResponse.js";
 import { Rating } from "../../../../models/rating.model.js";
 import { isValidObjectId } from "../../../../utils/helpers.js";
 import ApiError from "../../../../utils/apiErrors.js";
-
-
 
 const validateRatings = [
     check('productId').notEmpty().withMessage('Product is required!'),

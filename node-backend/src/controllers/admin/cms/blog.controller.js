@@ -1,7 +1,7 @@
 
 
 import { body, validationResult } from "express-validator";
-import asyncHandler from "../../../utils/aysncHandler.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
 import ApiError from "../../../utils/apiErrors.js";
 import { Blog } from "../../../models/cms/blogs.model.js";
 import ApiResponse from "../../../utils/apiResponse.js";

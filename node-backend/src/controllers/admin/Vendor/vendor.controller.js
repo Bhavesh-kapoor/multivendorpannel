@@ -3,7 +3,7 @@ import { User } from "../../../models/user.model.js";
 import ApiError from "../../../utils/apiErrors.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import { isValidObjectId } from "../../../utils/helpers.js";
-import asyncHandler from "../../../utils/aysncHandler.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
 
 const vendorValidations = [
   check("firstName").notEmpty().withMessage("First Name is required!"),

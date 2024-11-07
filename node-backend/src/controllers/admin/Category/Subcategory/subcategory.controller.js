@@ -3,8 +3,8 @@ import { validationResult, check } from "express-validator";
 import ApiError from "../../../../utils/apiErrors.js";
 import ApiResponse from "../../../../utils/apiResponse.js";
 import Subcategory from "../../../../models/subcategories.model.js";
+import asyncHandler from "../../../../models/asyncHandler.js";
 import { isValidObjectId } from "../../../../utils/helpers.js";
-
 
 
 // Validation rules
@@ -14,8 +14,6 @@ const validateSubCategory = [
         .notEmpty().withMessage('Sub Category name is required')
         .isLength({ min: 2 }).withMessage(' Sub Category name must be at least 2 characters long'),
     check('isActive').notEmpty().withMessage('Sub Category  activate or deactivation is required')
-
-
 ];
 
 const index = async (req, res) => {
@@ -57,6 +55,17 @@ const index = async (req, res) => {
 
 };
 
+const getSubCategoryByCategory = async (req, res) => {
+    // const getAllSubCategories = await Subcategory.find().sort({ _id: 1 });
+    const { categoryId } = req.params;
+    if (!isValidObjectId(categoryId)) {
+        return res.status(400).json(new ApiError(400, '', 'Invalid Category ID!'));
+    }
+    const getAllSubCategories = await Subcategory.find({ categoryId }).sort({ _id: 1 });
+    return res.status(200).json(new ApiResponse(200, getAllSubCategories, 'Sub Category Fetched Successfully!'));
+
+
+};
 
 
 
@@ -149,4 +158,4 @@ const deleteSubCategoryById = async (req, res) => {
 
 }
 
-export { index, store, update, validateSubCategory, SubcategoryById, deleteSubCategoryById };
+export { index, store, update, validateSubCategory, SubcategoryById, deleteSubCategoryById, getSubCategoryByCategory };

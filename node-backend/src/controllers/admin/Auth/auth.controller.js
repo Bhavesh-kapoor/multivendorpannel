@@ -3,7 +3,7 @@ import ApiResponse from "../../../utils/apiResponse.js";
 import { createAccessOrRefreshToken } from "../../../utils/helpers.js";
 
 import { User } from "../../../models/user.model.js";
-import asyncHandler from "../../../utils/aysncHandler.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
 
 /*-------------------------------------------Login for all users ------------------------------------*/
 const login = asyncHandler(async (req, res) => {
@@ -112,8 +112,8 @@ const loginHandler = async (req, res) => {
 };
 
 const getuserinfo = (async (req, res) => {
-  
-  return res.status(200).json(new ApiResponse(200,  req.user,'User info'));
+
+  return res.status(200).json(new ApiResponse(200, req.user, 'User info'));
 
 });
 

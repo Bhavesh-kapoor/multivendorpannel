@@ -1,5 +1,5 @@
 import { AboutUs } from "../../../models/cms/aboutUs.model.js";
-import asyncHandler from "../../../utils/aysncHandler.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import ApiError from "../../../utils/apiErrors.js";
 import { check, validationResult } from "express-validator";

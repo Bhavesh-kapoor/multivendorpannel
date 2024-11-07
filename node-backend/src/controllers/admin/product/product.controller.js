@@ -9,7 +9,7 @@ import { body, check, validationResult } from "express-validator";
 import ApiError from "../../../utils/apiErrors.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import { isValidObjectId } from "../../../utils/mongoose.utility.js";
-import asyncHandler from "../../../utils/aysncHandler.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
 import cloudinary from "../../../config/cloudinaryConfig.js";
 import { deleteImageByUrl } from "../../../utils/helpers.js";
 import { json } from "express";
@@ -35,7 +35,7 @@ const addProduct = asyncHandler(async (req, res) => {
     }
     try {
       console.log(req.body);
-      const { category, dynamicData } = req.body; // Extract category from request body
+      const { category, dynamicData } = req.body; 
 
       let product;
 
