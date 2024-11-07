@@ -7,8 +7,8 @@ import {
   getAllProducts,
   productValidationRules,
 } from "../controllers/admin/product/product.controller.js";
-import { multerUpload } from "../middleware/multer.middlewere.js";
-import { uploadToCloudinary } from "../middleware/cloudinary.middlewere.js";
+// import { multerUpload } from "../middleware/multer.middlewere.js";
+// import { uploadToCloudinary } from "../middleware/cloudinary.middlewere.js";
 
 const router = new Router();
 // router.post("/add", multerUpload.array("imageFiles", 10), uploadToCloudinary(), productValidationRules, addProduct)

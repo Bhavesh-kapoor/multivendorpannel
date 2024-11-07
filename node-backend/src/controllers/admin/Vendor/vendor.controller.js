@@ -1,20 +1,16 @@
-import { body, check, validationResult } from "express-validator";
-import { User } from "../../../models/user.model.js";
 import ApiError from "../../../utils/apiErrors.js";
+import { User } from "../../../models/user.model.js";
 import ApiResponse from "../../../utils/apiResponse.js";
-import { isValidObjectId } from "../../../utils/helpers.js";
 import asyncHandler from "../../../utils/aysncHandler.js";
+import { check, validationResult } from "express-validator";
+import { deleteImageByUrl, isValidObjectId } from "../../../utils/helpers.js";
 
 const vendorValidations = [
-  check("firstName").notEmpty().withMessage("First Name is required!"),
-  check("lastName").notEmpty().withMessage("Last Name is required!"),
   check("email").notEmpty().withMessage("Email is required!"),
   check("mobile").notEmpty().withMessage("Mobile is required!"),
+  check("lastName").notEmpty().withMessage("Last Name is required!"),
   check("shopName").notEmpty().withMessage("Shop Name is required!"),
-  check("address").notEmpty().withMessage("Address is required!"),
-  check("password").notEmpty().withMessage("Password  is required!"),
-  check("commissionRate").optional(),
-  check("allowedTabs").notEmpty().isLength({ min: 1 }),
+  check("firstName").notEmpty().withMessage("First Name is required!"),
 ];
 
 const createVendor = async (req, res) => {
@@ -22,23 +18,21 @@ const createVendor = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json(new ApiError(400, "Validation Error", errors));
   }
-
   const {
-    firstName,
-    lastName,
+    gst,
     email,
     mobile,
-    address,
+    gender,
+    lastName,
     shopName,
-    gst,
     shopType,
-    commissionRate,
-    password,
-    allowedTabs,
+    isActive,
+    firstName,
+    dateOfBirth,
+    cloudinaryUrls,
   } = req.body;
-
+  const profileImage = (cloudinaryUrls && cloudinaryUrls["profileImage"]) || "";
   try {
-    // Check if vendor with same email exists
     const existingVendor = await User.findOne({ email });
     if (existingVendor) {
       return res
@@ -47,29 +41,23 @@ const createVendor = async (req, res) => {
           new ApiError(400, "Vendor with this email already exists", [], "")
         );
     }
-    shopdetails = {
-      name: shopName,
-      gst: gst,
-      shopType: shopType,
-    };
-    // Naya vendor object create karo
+    const shopdetails = { gst: gst, name: shopName, shopType: shopType };
     const vendor = new User({
-      firstName,
-      lastName,
+      gst,
       email,
       mobile,
-      address,
+      gender,
+      lastName,
+      shopName,
+      shopType,
+      isActive,
+      firstName,
+      dateOfBirth,
       shopdetails,
-      commissionRate,
+      profileImage,
       role: "vendor",
-      password,
-      allowedTabs,
     });
-
-    // Vendor ko database mein save karo
     const vendorcreated = await vendor.save();
-
-    // return response
     return res
       .status(201)
       .json(new ApiResponse(200, vendorcreated, "Vendor created successfully"));
@@ -124,10 +112,12 @@ export const getUserById = async (req, res) => {
         email: 1,
         mobile: 1,
         gender: 1,
+        isActive: 1,
         lastName: 1,
         firstName: 1,
         dateOfBirth: 1,
         profileImage: 1,
+        shopdetails: 1,
       }
     );
     if (!result) {
@@ -135,9 +125,17 @@ export const getUserById = async (req, res) => {
         .status(404)
         .json(new ApiError(404, "Vendor not found", [], ""));
     }
+    const formattedData = JSON.parse(JSON.stringify(result));
+    const data = {
+      ...formattedData,
+      gst: result?.shopdetails?.gst,
+      shopName: result?.shopdetails?.name,
+      shopType: result?.shopdetails?.shopType,
+    };
+    delete data?.shopdetails;
     return res
       .status(200)
-      .json(new ApiResponse(200, result, "Data Fetched Successfully"));
+      .json(new ApiResponse(200, data, "Data Fetched Successfully"));
   } catch (error) {
     return res
       .status(500)
@@ -237,76 +235,59 @@ const updateVendor = asyncHandler(async (req, res) => {
     return res.status(400).json(new ApiError(400, "Invalid vendor ID"));
   }
 
-  const { firstName, lastName, mobile, shopdetails, allowedTabs, isActive } =
-    req.body;
+  const {
+    gst,
+    email,
+    mobile,
+    gender,
+    shopType,
+    lastName,
+    shopName,
+    isActive,
+    firstName,
+    dateOfBirth,
+    cloudinaryUrls,
+  } = req.body;
+  const profileImage = (cloudinaryUrls && cloudinaryUrls["profileImage"]) || "";
+
   const existingVendor = await User.findById(_id);
-  if (!existingVendor) {
+  if (profileImage) await deleteImageByUrl(existingVendor.profileImage);
+
+  if (!existingVendor)
     return res.status(404).json(new ApiError(404, null, "Vendor not found"));
-  }
+
   if (existingVendor.role !== "vendor") {
     return res
       .status(400)
       .json(new ApiError(400, null, "User is not a vendor"));
   }
 
-  // Prepare the update object with validation
-  const updateFields = {};
+  const updateFields = {
+    ...(gender && { gender }),
+    ...(lastName && { lastName }),
+    ...(firstName && { firstName }),
+    ...(dateOfBirth && { dateOfBirth }),
+    ...(profileImage && { profileImage }),
+    ...(isActive !== undefined && { isActive }),
+    ...(email && !existingVendor?.isEmailVerified && { email }),
+    ...(mobile && !existingVendor?.isMobileVerified && { mobile }),
+  };
 
-  // Basic fields
-  if (firstName) updateFields.firstName = firstName;
-  if (lastName) updateFields.lastName = lastName;
-  if (mobile) updateFields.mobile = mobile;
-  if (isActive !== undefined) updateFields.isActive = isActive;
-
-  // Shop details validation
-  if (shopdetails) {
-    // Validate GST format
-    if (shopdetails.gst && !/^[0-9A-Z]{15}$/.test(shopdetails.gst)) {
+  if (gst || shopName || shopType) {
+    const updatedShopDetails = {
+      gst: gst || existingVendor.shopdetails?.gst,
+      name: shopName || existingVendor.shopdetails?.name,
+      shopType: shopType || existingVendor.shopdetails?.shopType,
+    };
+    if (
+      updatedShopDetails.gst &&
+      !/^[0-9A-Z]{15}$/.test(updatedShopDetails.gst)
+    ) {
       return res
         .status(400)
         .json(new ApiError(400, null, "Invalid GST number format"));
     }
-
-    // Validate shop type
-    if (
-      shopdetails.shopType &&
-      !["Retail", "Wholesale", "Online", "Franchise"].includes(
-        shopdetails.shopType
-      )
-    ) {
-      return res.status(400).json(new ApiError(400, null, "Invalid shop type"));
-    }
-    const updatedShopDetails = {};
-    shopdetails.name
-      ? (updatedShopDetails.name = shopdetails.name)
-      : (updatedShopDetails.name = existingVendor.shopdetails.name);
-    shopdetails.gst
-      ? (updatedShopDetails.gst = shopdetails.gst)
-      : (updatedShopDetails.gst = existingVendor.shopdetails.gst);
-    shopdetails.shopType
-      ? (updatedShopDetails.shopType = shopdetails.shopType)
-      : (updatedShopDetails.shopType = existingVendor.shopdetails.shopType);
-    // Assign the updated shop details object to updateFields
     updateFields.shopdetails = updatedShopDetails;
-  }
-  // Allowed tabs validation
-  if (allowedTabs) {
-    const isValidTabs = allowedTabs.every(
-      (tab) =>
-        tab.name &&
-        Array.isArray(tab.crudRoles) &&
-        tab.crudRoles.every((role) =>
-          ["Read", "Create", "Edit", "Delete"].includes(role)
-        )
-    );
-
-    if (!isValidTabs) {
-      return res
-        .status(400)
-        .json(new ApiError(400, "Invalid allowed tabs format"));
-    }
-
-    updateFields.allowedTabs = allowedTabs;
   }
 
   // Update the vendor
@@ -322,13 +303,7 @@ const updateVendor = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { vendor: updatedVendor },
-        "Vendor updated successfully"
-      )
-    );
+    .json(new ApiResponse(200, updatedVendor, "Vendor updated successfully"));
 });
 
 const deleteVendor = async (req, res) => {
@@ -357,8 +332,8 @@ const deleteVendor = async (req, res) => {
 };
 
 export {
-  createVendor,
   readVendor,
+  createVendor,
   updateVendor,
   deleteVendor,
   readAllVendors,
