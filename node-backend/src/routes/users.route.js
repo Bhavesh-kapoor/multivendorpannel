@@ -3,14 +3,17 @@ import {
   Index,
   create,
   logout,
-  rating,
-  getAllRating,
   permissions,
+  // createAdmin,
+  // rating,
+  // getAllRating,
 } from "../controllers/admin/Users/user.controller.js";
 
 const usersRoute = Router();
 
 usersRoute.get("/add", create);
+
+// usersRoute.post("/create-admin", createAdmin);
 
 usersRoute.get("/all", Index);
 

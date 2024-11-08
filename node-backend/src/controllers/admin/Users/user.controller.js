@@ -103,5 +103,11 @@ const permissions = asyncHandler(async (req, res) => {
       );
   }
 });
+// export const createAdmin = asyncHandler(async (req, res) => {
+//   const data = req.body;
+//   console.log(data);
+//   const user = new User(data);
+//   await user.save();
+// });
 
 export { Index, create, logout, rating, getAllRating, permissions };
