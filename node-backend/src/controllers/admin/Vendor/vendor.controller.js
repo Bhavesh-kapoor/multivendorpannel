@@ -116,8 +116,9 @@ export const getUserById = async (req, res) => {
         lastName: 1,
         firstName: 1,
         dateOfBirth: 1,
-        profileImage: 1,
         shopdetails: 1,
+        allowedTabs: 1,
+        profileImage: 1,
       }
     );
     if (!result) {
@@ -145,18 +146,18 @@ export const getUserById = async (req, res) => {
 
 const readAllVendors = async (req, res) => {
   const {
+    role,
+    status,
+    endDate,
     page = 1,
+    startDate,
+    searchkey,
     limit = 10,
     search = "",
-    status,
-    searchkey,
-    startDate,
-    endDate,
-    sortkey = "created_at",
     sortdir = "desc",
+    sortkey = "createdAt",
   } = req.query;
 
-  const { role } = req.user;
   const pageNumber = parseInt(page);
   const limitNumber = parseInt(limit);
 
@@ -164,7 +165,7 @@ const readAllVendors = async (req, res) => {
     const pipeline = [];
     const matchStage = {};
 
-    if (role !== "admin") matchStage.role = role;
+    if (role) matchStage.role = role;
     if (search && searchkey)
       matchStage[searchkey] = { $regex: search, $options: "i" };
 
