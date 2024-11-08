@@ -1,13 +1,39 @@
 import { Router } from "express";
-import { createVendor, deleteVendor, readAllVendors, readVendor, updateVendor, vendorValidations } from "../controllers/admin/Vendor/vendor.controller.js";
+import {
+  readVendor,
+  getUserById,
+  createVendor,
+  deleteVendor,
+  updateVendor,
+  readAllVendors,
+  vendorValidations,
+} from "../controllers/admin/Vendor/vendor.controller.js";
+import { multerUpload } from "../middleware/multer.middlewere.js";
+import uploadToCloudinary from "../middleware/cloudinary.middlewere.js";
+
 const vendorsRoute = Router();
 
+vendorsRoute.post(
+  "/",
+  multerUpload.single("profileImage"),
+  uploadToCloudinary,
+  vendorValidations,
+  createVendor
+);
 
-vendorsRoute.post("/",vendorValidations , createVendor)
-vendorsRoute.get("/",readAllVendors)
-vendorsRoute.get("/:email",readVendor)
-vendorsRoute.put("/:_id",updateVendor)  
-vendorsRoute.delete("/:_id",deleteVendor)
+vendorsRoute.get("/", readAllVendors);
 
+vendorsRoute.get("/get/:id", getUserById);
 
-export default vendorsRoute
+vendorsRoute.get("/:email", readVendor);
+
+vendorsRoute.put(
+  "/:_id",
+  multerUpload.single("profileImage"),
+  uploadToCloudinary,
+  updateVendor
+);
+
+vendorsRoute.delete("/:_id", deleteVendor);
+
+export default vendorsRoute;
