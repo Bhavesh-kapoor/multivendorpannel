@@ -45,17 +45,14 @@ async function deleteImageByUrl(imageUrl) {
   const publicId = extractPublicIdFromUrl(imageUrl);
   if (!publicId) {
     console.error("Invalid URL or public_id not found.");
-    throw new ApiError(400, null, "Invalid URL or public_id not found");
+    return { success: false, message: "Invalid URL or public_id not found." };
   }
   try {
     await cloudinary.uploader.destroy(publicId);
     console.log(`Image with public_id '${publicId}' deleted successfully.`);
     return { success: true, message: "Image deleted successfully" };
   } catch (error) {
-    console.error("Error deleting image:", error);
-    throw new ApiError(500, "Error deleting image from Cloudinary", [
-      error.message,
-    ]);
+    console.error("no image on clodinary to deleting image:", error);
   }
 }
 

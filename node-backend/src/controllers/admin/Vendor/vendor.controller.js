@@ -3,6 +3,7 @@ import { User } from "../../../models/user.model.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import { isValidObjectId } from "../../../utils/helpers.js";
 import asyncHandler from "../../../utils/asyncHandler.js";
+import { check, validationResult } from "express-validator"
 
 const vendorValidations = [
   check("email").notEmpty().withMessage("Email is required!"),
