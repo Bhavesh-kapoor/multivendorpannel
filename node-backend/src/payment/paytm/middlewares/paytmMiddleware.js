@@ -9,6 +9,6 @@ export const generateSignature = (params, key) => {
 };
 
 export const verifySignature = (params, signature, key) => {
-  const generatedSignature = this.generateSignature(params, key);
+  const generatedSignature = generateSignature(params, key);
   return generatedSignature === signature;
 };
