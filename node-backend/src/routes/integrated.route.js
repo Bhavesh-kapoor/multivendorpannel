@@ -11,6 +11,9 @@ import usersRoute from "./users.route.js";
 import ratingRoutes from "./ratings.routes.js";
 import verifyJwtToken from "../middleware/auth.middleware.js";
 
+// Payment routes
+import paymentsRoute from "./payment.route.js";
+
 const route = Router();
 route.use("/auth", authRoute);
 route.use("/categories", categoryRoute);
@@ -22,5 +25,8 @@ route.use("/page-banner", pageBannerRoutes);
 route.use("/about-us", aboutUsRoutes);
 route.use("/user", usersRoute);
 route.use("/ratings", ratingRoutes);
+
+// Payment routes
+route.use("/payments", paymentsRoute);
 
 export default route;
