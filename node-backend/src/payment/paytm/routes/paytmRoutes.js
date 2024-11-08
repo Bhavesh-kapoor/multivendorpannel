@@ -1,13 +1,15 @@
 import express from "express";
 import {
-  initiatePayment,
-  verifyTransaction,
+  handleOrder,
+  initializeOrder,
+  initiatePaytmPayment,
+  verifyPaytmTransaction,
 } from "../controllers/paytmController.js";
 
 const router = express.Router();
 
-router.post("/initiate", initiatePayment);
+router.post("/initiate", initializeOrder, initiatePaytmPayment);
 
-router.post("/callback", verifyTransaction);
+router.post("/callback", verifyPaytmTransaction, handleOrder);
 
 export default router;

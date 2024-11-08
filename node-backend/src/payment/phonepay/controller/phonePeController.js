@@ -18,6 +18,7 @@ const { merchantId, redirectUrl, phonepeUrl } = phonepeConfig;
  * @property {Object} paymentOptions - The payment options for the transaction.
  * @property {number} paymentOptions.amount - The amount for the payment (required).
  * @property {number} paymentOptions.merchantUserId - The user ID associated with the payment (required).
+ * @property {number} paymentOptions.transactionId - The transactin ID associated with the payment (required).
  *
  * @returns {void}
  */
