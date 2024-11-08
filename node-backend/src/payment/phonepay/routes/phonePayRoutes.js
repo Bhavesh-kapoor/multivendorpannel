@@ -1,8 +1,15 @@
 import express from "express";
-import { initiatePayment } from "../controller/phonePeController.js";
+import {
+  handleOrder,
+  initializeOrder,
+  verifyPhonePePayment,
+  initiatePhonePePayment,
+} from "../controller/phonePeController.js";
 
 const router = express.Router();
 
-router.post("/initiate", initiatePayment);
+router.post("/initiate", initializeOrder, initiatePhonePePayment);
+
+router.get("/callback/:transactionId", verifyPhonePePayment, handleOrder);
 
 export default router;
