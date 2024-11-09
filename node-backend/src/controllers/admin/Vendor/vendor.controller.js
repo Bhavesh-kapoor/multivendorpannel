@@ -3,7 +3,13 @@ import { User } from "../../../models/user.model.js";
 import ApiResponse from "../../../utils/apiResponse.js";
 import asyncHandler from "../../../utils/aysncHandler.js";
 import { check, validationResult } from "express-validator";
-import { deleteImageByUrl, isValidObjectId } from "../../../utils/helpers.js";
+import {
+  createAccessOrRefreshToken,
+  deleteImageByUrl,
+  isValidObjectId,
+  sendMail,
+} from "../../../utils/helpers.js";
+import OTP from "../../../models/otpModel.js";
 
 const vendorValidations = [
   check("email").notEmpty().withMessage("Email is required!"),
@@ -37,9 +43,7 @@ const createVendor = async (req, res) => {
     if (existingVendor) {
       return res
         .status(400)
-        .json(
-          new ApiError(400, "Vendor with this email already exists", [], "")
-        );
+        .json(new ApiError(400, null, "Vendor with this email already exists"));
     }
     const shopdetails = { gst: gst, name: shopName, shopType: shopType };
     const vendor = new User({
@@ -62,10 +66,9 @@ const createVendor = async (req, res) => {
       .status(201)
       .json(new ApiResponse(200, vendorcreated, "Vendor created successfully"));
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
-      .json(new ApiError(500, "Error creating vendor", [error.message], ""));
+      .json(new ApiError(500, null, "Error creating vendor"));
   }
 };
 
@@ -102,6 +105,175 @@ const readVendor = async (req, res) => {
   }
 };
 
+export const resetPassword = async (req, res) => {
+  try {
+    const { _id } = req.user;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res
+        .status(400)
+        .json(
+          new ApiError(400, null, "Both old and new passwords are required.")
+        );
+    }
+
+    if (oldPassword === newPassword) {
+      return res
+        .status(400)
+        .json(
+          new ApiError(
+            400,
+            null,
+            "New password must be different from the old password."
+          )
+        );
+    }
+
+    const user = await User.findById(_id);
+    if (!user)
+      return res.status(404).json(new ApiError(404, "User not found.", [], ""));
+
+    const isMatch = await user.isPasswordCorrect(oldPassword);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json(new ApiError(400, "Old password is incorrect.", [], ""));
+    }
+
+    user.password = newPassword;
+    await user.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "Password reset successfully." });
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new ApiError(
+          500,
+          "An error occurred while resetting the password.",
+          [],
+          ""
+        )
+      );
+  }
+};
+
+export const forgetPassword = async (req, res) => {
+  const { email, otp, resetPassword } = req.body;
+
+  try {
+    const otpData = await OTP.findOne({ email });
+    if (!otpData) {
+      return res
+        .status(400)
+        .json(
+          new ApiError(400, "Invalid OTP", "OTP not found for this email.")
+        );
+    }
+
+    if (otp !== otpData.otp)
+      return res
+        .status(400)
+        .json(new ApiError(400, "Invalid OTP", "OTP does not match."));
+
+    const userData = await User.findOne({ email });
+    if (!userData)
+      return res.status(404).json(new ApiError(404, null, "User not found."));
+
+    if (!resetPassword) {
+      return res
+        .status(400)
+        .json(new ApiError(400, null, "Please provide a new password."));
+    }
+
+    const { accessToken, refreshToken } = await createAccessOrRefreshToken(
+      userData._id
+    );
+    userData.password = resetPassword;
+    await userData.save();
+
+    await OTP.deleteOne({ email });
+
+    const LoggedInUser = await User.findById(userData._id).select(
+      "-password -refreshToken"
+    );
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          user: LoggedInUser,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        },
+        "Password successfully reset"
+      )
+    );
+  } catch (err) {
+    return res
+      .status(500)
+      .json(
+        new ApiError(
+          500,
+          "Server Error",
+          "An error occurred while resetting the password."
+        )
+      );
+  }
+};
+
+export const sendOTPToMail = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res
+        .status(400)
+        .json(new ApiError(400, "Invalid email", "Email is required."));
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json(
+          new ApiError(
+            404,
+            "User not found",
+            "No user found with this email address."
+          )
+        );
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit OTP
+
+    const otpData = new OTP({ email, otp });
+    await otpData.save();
+
+    const subject = "Your OTP Code";
+    const htmlContent = `<p>Your OTP code is <strong>${otp}</strong></p><p>This OTP is valid for 5 minutes only.</p>`;
+
+    sendMail(email, subject, htmlContent);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully.",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new ApiError(
+          500,
+          "Server Error",
+          "An error occurred while sending OTP."
+        )
+      );
+  }
+};
+
 export const getUserById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -122,9 +294,7 @@ export const getUserById = async (req, res) => {
       }
     );
     if (!result) {
-      return res
-        .status(404)
-        .json(new ApiError(404, "Vendor not found", [], ""));
+      return res.status(404).json(new ApiError(404, null, "Vendor not found"));
     }
     const formattedData = JSON.parse(JSON.stringify(result));
     const data = {
@@ -140,7 +310,7 @@ export const getUserById = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json(new ApiError(500, "Error reading vendor", [error.message], ""));
+      .json(new ApiError(500, null, "Error reading vendor"));
   }
 };
 
@@ -204,9 +374,7 @@ const readAllVendors = async (req, res) => {
     const totalUsers = await User.countDocuments();
 
     if (!vendors.length) {
-      return res
-        .status(404)
-        .json(new ApiError(404, "No vendors found", [], ""));
+      return res.status(404).json(new ApiError(404, null, "No vendors found"));
     }
     return res.status(200).json(
       new ApiResponse(
@@ -226,14 +394,14 @@ const readAllVendors = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json(new ApiError(500, "Error reading vendors", [error.message], ""));
+      .json(new ApiError(500, null, "Error reading vendors"));
   }
 };
 
 const updateVendor = asyncHandler(async (req, res) => {
   const { _id } = req.params;
   if (!isValidObjectId(_id)) {
-    return res.status(400).json(new ApiError(400, "Invalid vendor ID"));
+    return res.status(400).json(new ApiError(400, null, "Invalid vendor ID"));
   }
 
   const {
@@ -321,7 +489,7 @@ const deleteVendor = async (req, res) => {
     if (!vendor) {
       return res
         .status(404)
-        .json(new ApiError(404, "Vendor not found", "Vendor not found", ""));
+        .json(new ApiError(404, null, "Vendor not found", ""));
     }
 
     return res
@@ -330,7 +498,7 @@ const deleteVendor = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json(new ApiError(500, "Error deleting vendor", [], ""));
+      .json(new ApiError(500, null, "Error deleting vendor"));
   }
 };
 
